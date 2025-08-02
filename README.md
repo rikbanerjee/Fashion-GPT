@@ -215,4 +215,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using React, Node.js, and Google Gemini AI 
+Built with ❤️ using React, Node.js, and Google Gemini AI by The CustomHub LLC
