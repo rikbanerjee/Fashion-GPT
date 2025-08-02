@@ -8,12 +8,17 @@
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "vercel-build": "cd client && npm run build"
   },
   "keywords": ["fashion", "ai", "color-recommendation", "gemini"],
   "author": "Fashion GPT Team",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.1",
+    "multer": "^1.4.5-lts.1"
   }
 } 
