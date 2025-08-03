@@ -17,4 +17,4 @@ module.exports = function handler(req, res) {
     message: 'Fashion GPT API is running',
     timestamp: new Date().toISOString()
   });
-} 
+}; 

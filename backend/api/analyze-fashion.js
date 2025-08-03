@@ -1,5 +1,9 @@
+const express = require('express');
+const cors = require('cors');
 const multer = require('multer');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const axios = require('axios');
 
 // Configure multer for memory storage
 const upload = multer({
@@ -16,8 +20,8 @@ const upload = multer({
   }
 });
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Gemini API configuration
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
 
 // Helper function to handle multer
 const runMiddleware = (req, res, fn) => {
@@ -85,59 +89,79 @@ module.exports = async function handler(req, res) {
     Focus on practical, wearable color combinations and avoid orange tones as they are not preferred.
     `;
 
-    // Initialize Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // Generate content with image
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          mimeType: mimeType,
-          data: base64Image
+    // Prepare the request payload for Gemini API
+    const requestPayload = {
+      contents: [{
+        parts: [
+          { text: prompt },
+          { inline_data: { mime_type: mimeType, data: base64Image } }
+        ]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
         }
-      }
-    ]);
+      ]
+    };
 
-    const response = await result.response;
-    const text = response.text();
-
-    // Try to parse JSON response, handling markdown code blocks
-    let analysis;
-    try {
-      // Extract JSON from markdown code blocks if present
-      let jsonText = text;
-      if (text.includes('```json')) {
-        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
-        if (jsonMatch) {
-          jsonText = jsonMatch[1];
-        }
+    // Make request to Gemini API
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`,
+      requestPayload,
+      { 
+        headers: { 'Content-Type': 'application/json' }, 
+        timeout: 30000 
       }
-      
-      analysis = JSON.parse(jsonText);
-    } catch (error) {
-      // If JSON parsing fails, return the raw text
-      analysis = {
-        rawResponse: text,
-        dominantColors: [],
-        complementaryColors: [],
-        seasonalRecommendations: "Analysis completed",
-        styleSuggestions: [],
-        colorPsychology: "Color analysis provided"
-      };
+    );
+
+    const text = response.data.candidates[0].content.parts[0].text;
+    
+    // Extract JSON from markdown code blocks if present
+    let jsonText = text;
+    if (text.includes('```json')) {
+      const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1];
+      }
     }
+
+    const analysis = JSON.parse(jsonText);
 
     res.json({
       success: true,
-      analysis: analysis,
-      originalImage: `data:${mimeType};base64,${base64Image}`
+      analysis: analysis
     });
 
   } catch (error) {
-    console.error('Error analyzing fashion image:', error);
+    console.error('Analysis error:', error);
+    
+    if (error.response) {
+      console.error('Gemini API Response Status:', error.response.status);
+      console.error('Gemini API Response Data:', error.response.data);
+    }
+
     res.status(500).json({
-      error: 'Failed to analyze image',
+      error: 'Analysis failed',
       details: error.message
     });
   }
-} 
+}; 
