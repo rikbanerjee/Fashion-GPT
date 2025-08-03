@@ -15,6 +15,15 @@ module.exports = function handler(req, res) {
   res.json({ 
     status: 'OK', 
     message: 'Fashion GPT API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    apiPaths: {
+      health: '/api/health',
+      analyzeFashion: '/api/analyze-fashion',
+      serverFile: 'backend/server/index.js',
+      apiFiles: {
+        health: 'backend/api/health.js',
+        analyzeFashion: 'backend/api/analyze-fashion.js'
+      }
+    }
   });
 }; 
