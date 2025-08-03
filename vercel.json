@@ -9,11 +9,8 @@
       }
     },
     {
-      "src": "backend/server/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["backend/package.json"]
-      }
+      "src": "backend/package.json",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
