@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageCircle } from 'lucide-react';
 
-const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
+const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) => {
   const [messages, setMessages] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
@@ -28,16 +28,16 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
       // Lock background scrolling
       document.body.classList.add('overflow-hidden');
       
-      // Initialize chat with welcome message if no history exists
-      if (chatHistory.length === 0 && messages.length === 0) {
-        setMessages([
-          {
-            id: 1,
-            type: 'bot',
-            content: 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
-            timestamp: new Date()
-          }
-        ]);
+      // Initialize chat with openingLine and suggestedReplies if analysis exists
+      if (analysis && analysis.analysis && messages.length === 0) {
+        const openingMessage = {
+          id: 1,
+          type: 'bot',
+          content: analysis.analysis.openingLine || 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
+          timestamp: new Date()
+        };
+        
+        setMessages([openingMessage]);
         setShowSuggestions(true);
       } else if (chatHistory.length > 0) {
         // Convert chat history to display format
@@ -49,6 +49,17 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
         }));
         setMessages(displayMessages);
         setShowSuggestions(false);
+      } else if (messages.length === 0) {
+        // Fallback welcome message
+        setMessages([
+          {
+            id: 1,
+            type: 'bot',
+            content: 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
+            timestamp: new Date()
+          }
+        ]);
+        setShowSuggestions(true);
       }
       
       // Focus input after animation
@@ -64,7 +75,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isOpen, chatHistory]);
+  }, [isOpen, chatHistory, analysis]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isTyping) return;
@@ -234,7 +245,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-wrap gap-2 justify-start"
                 >
-                  {['What\'s the occasion?', 'Show me shoe options', 'I don\'t like these colors'].map((suggestion, index) => (
+                  {(analysis?.analysis?.suggestedReplies || ['What\'s the occasion?', 'Show me shoe options', 'I don\'t like these colors']).map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}

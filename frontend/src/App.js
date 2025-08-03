@@ -24,12 +24,14 @@ function App() {
       parts: [{ text: 'Analyze this image and give me fashion advice.' }]
     };
     
-    const initialAnalysisText = result.analysis.rawResponse || 
-      `Dominant Colors: ${result.analysis.dominantColors?.join(', ') || 'N/A'}
-       Complementary Colors: ${result.analysis.complementaryColors?.join(', ') || 'N/A'}
-       Seasonal Recommendations: ${result.analysis.seasonalRecommendations || 'N/A'}
-       Style Suggestions: ${result.analysis.styleSuggestions?.join(', ') || 'N/A'}
-       Color Psychology: ${result.analysis.colorPsychology || 'N/A'}`;
+    // Create the full analysis text from the structured response
+    const analysisData = result.analysis;
+    const initialAnalysisText = analysisData.rawResponse || 
+      `Dominant Colors: ${analysisData.dominantColors?.join(', ') || 'N/A'}
+       Complementary Colors: ${analysisData.complementaryColors?.join(', ') || 'N/A'}
+       Seasonal Recommendations: ${analysisData.seasonalRecommendations || 'N/A'}
+       Style Suggestions: ${analysisData.styleSuggestions?.join(', ') || 'N/A'}
+       Color Psychology: ${analysisData.colorPsychology || 'N/A'}`;
     
     const initialModelMessage = {
       role: 'model',
@@ -247,6 +249,7 @@ function App() {
         onClose={() => setIsChatOpen(false)} 
         chatHistory={chatHistory}
         sendMessage={sendChatMessage}
+        analysis={analysis}
       />
     </div>
   );
