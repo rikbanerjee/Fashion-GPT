@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Send, MessageCircle } from 'lucide-react';
 
-const ChatInterface = ({ isOpen, onClose }) => {
+const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage }) => {
   const [messages, setMessages] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
@@ -28,8 +28,8 @@ const ChatInterface = ({ isOpen, onClose }) => {
       // Lock background scrolling
       document.body.classList.add('overflow-hidden');
       
-      // Initialize chat with welcome message
-      if (messages.length === 0) {
+      // Initialize chat with welcome message if no history exists
+      if (chatHistory.length === 0 && messages.length === 0) {
         setMessages([
           {
             id: 1,
@@ -39,6 +39,16 @@ const ChatInterface = ({ isOpen, onClose }) => {
           }
         ]);
         setShowSuggestions(true);
+      } else if (chatHistory.length > 0) {
+        // Convert chat history to display format
+        const displayMessages = chatHistory.map((msg, index) => ({
+          id: index + 1,
+          type: msg.role === 'user' ? 'user' : 'bot',
+          content: msg.parts[0].text,
+          timestamp: new Date()
+        }));
+        setMessages(displayMessages);
+        setShowSuggestions(false);
       }
       
       // Focus input after animation
@@ -54,10 +64,10 @@ const ChatInterface = ({ isOpen, onClose }) => {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isOpen, messages.length]);
+  }, [isOpen, chatHistory]);
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isTyping) return;
 
     const userMessage = {
       id: Date.now(),
@@ -71,22 +81,36 @@ const ChatInterface = ({ isOpen, onClose }) => {
     setShowSuggestions(false);
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const response = getBotResponse(inputValue.trim());
+    try {
+      // Send message to backend
+      const response = await sendMessage(inputValue.trim());
+      
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: response.content,
-        timestamp: new Date(),
-        products: response.products
+        content: response,
+        timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      
+      // Show error message
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = async (suggestion) => {
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -98,74 +122,32 @@ const ChatInterface = ({ isOpen, onClose }) => {
     setShowSuggestions(false);
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const response = getBotResponse(suggestion);
+    try {
+      // Send suggestion to backend
+      const response = await sendMessage(suggestion);
+      
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: response.content,
-        timestamp: new Date(),
-        products: response.products
+        content: response,
+        timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Failed to send suggestion:', error);
+      
+      // Show error message
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
-  };
-
-  const getBotResponse = (userInput) => {
-    const input = userInput.toLowerCase();
-    
-    if (input.includes('occasion') || input.includes('event')) {
-      return {
-        content: "Perfect! Let me help you find the right look for your occasion. Here are some stylish options that would work great with your color palette:",
-        products: [
-          { title: "Elegant Evening Dress", price: "$89.99" },
-          { title: "Classic Blazer", price: "$129.99" },
-          { title: "Statement Necklace", price: "$45.99" },
-          { title: "Silk Scarf", price: "$32.99" }
-        ]
-      };
-    } else if (input.includes('shoe') || input.includes('footwear')) {
-      return {
-        content: "Great choice! Shoes can make or break an outfit. Here are some fabulous footwear options that complement your style:",
-        products: [
-          { title: "Leather Ankle Boots", price: "$149.99" },
-          { title: "Classic Pumps", price: "$89.99" },
-          { title: "Comfortable Flats", price: "$69.99" },
-          { title: "Statement Heels", price: "$119.99" }
-        ]
-      };
-    } else if (input.includes('don\'t like') || input.includes('hate') || input.includes('dislike')) {
-      return {
-        content: "No worries! Let's find colors that work better for you. What colors do you typically feel most confident in? I can suggest alternatives that might be more your style.",
-        products: null
-      };
-    } else if (input.includes('color') || input.includes('colour')) {
-      return {
-        content: "Great question about colors! I can help you with color coordination, seasonal color analysis, and finding the perfect color combinations for your style. What specific color advice are you looking for?",
-        products: null
-      };
-    } else if (input.includes('style') || input.includes('fashion')) {
-      return {
-        content: "I'd love to help with your style! I can provide advice on outfit coordination, seasonal trends, and personal style development. What aspect of style would you like to explore?",
-        products: null
-      };
-    } else if (input.includes('outfit') || input.includes('clothing')) {
-      return {
-        content: "Perfect! I can help you put together amazing outfits. I can suggest combinations, recommend pieces, and help you build a cohesive wardrobe. What type of outfit are you thinking about?",
-        products: null
-      };
-    } else if (input.includes('hello') || input.includes('hi')) {
-      return {
-        content: "Hello! I'm here to help you with all things fashion and style. Feel free to ask me about colors, outfits, trends, or any fashion-related questions!",
-        products: null
-      };
-    } else {
-      return {
-        content: "That's an interesting question! I'm here to help with fashion advice, color coordination, style tips, and wardrobe suggestions. Could you tell me more about what you're looking for?",
-        products: null
-      };
     }
   };
 
@@ -180,75 +162,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Product carousel component
-  const ProductCarousel = ({ products }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const carouselRef = useRef(null);
 
-    const scrollToNext = () => {
-      if (currentIndex < products.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        carouselRef.current?.scrollTo({
-          left: (currentIndex + 1) * 280,
-          behavior: 'smooth'
-        });
-      }
-    };
-
-    const scrollToPrev = () => {
-      if (currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
-        carouselRef.current?.scrollTo({
-          left: (currentIndex - 1) * 280,
-          behavior: 'smooth'
-        });
-      }
-    };
-
-    return (
-      <div className="relative">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-gray-700">Recommended Products</h4>
-          <div className="flex space-x-2">
-            <button
-              onClick={scrollToPrev}
-              disabled={currentIndex === 0}
-              className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={scrollToNext}
-              disabled={currentIndex === products.length - 1}
-              className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-        <div
-          ref={carouselRef}
-          className="flex space-x-4 overflow-x-auto scrollbar-hide pb-2"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {products.map((product, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 w-64 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-            >
-              <div className="h-32 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <div className="text-gray-400 text-sm">Product Image</div>
-              </div>
-              <div className="p-3">
-                <h5 className="font-medium text-gray-800 text-sm mb-1">{product.title}</h5>
-                <p className="text-indigo-600 font-semibold text-sm">{product.price}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <AnimatePresence>
@@ -308,12 +222,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
                       {formatTime(message.timestamp)}
                     </p>
                     
-                    {/* Product Carousel for bot messages */}
-                    {message.type === 'bot' && message.products && (
-                      <div className="mt-4">
-                        <ProductCarousel products={message.products} />
-                      </div>
-                    )}
+                    {/* Product Carousel for bot messages - removed since we're using real backend */}
                   </div>
                 </motion.div>
               ))}

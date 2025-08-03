@@ -11,11 +11,32 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
 
   const handleAnalysisComplete = (result) => {
     setAnalysis(result);
     setLoading(false);
     setError(null);
+    
+    // Initialize chat history with the initial analysis
+    const initialUserMessage = {
+      role: 'user',
+      parts: [{ text: 'Analyze this image and give me fashion advice.' }]
+    };
+    
+    const initialAnalysisText = result.analysis.rawResponse || 
+      `Dominant Colors: ${result.analysis.dominantColors?.join(', ') || 'N/A'}
+       Complementary Colors: ${result.analysis.complementaryColors?.join(', ') || 'N/A'}
+       Seasonal Recommendations: ${result.analysis.seasonalRecommendations || 'N/A'}
+       Style Suggestions: ${result.analysis.styleSuggestions?.join(', ') || 'N/A'}
+       Color Psychology: ${result.analysis.colorPsychology || 'N/A'}`;
+    
+    const initialModelMessage = {
+      role: 'model',
+      parts: [{ text: initialAnalysisText }]
+    };
+    
+    setChatHistory([initialUserMessage, initialModelMessage]);
   };
 
   const handleAnalysisError = (errorMessage) => {
@@ -26,6 +47,50 @@ function App() {
   const handleStartAnalysis = () => {
     setLoading(true);
     setError(null);
+  };
+
+  const sendChatMessage = async (userMessage) => {
+    try {
+      // Add user message to chat history
+      const newUserMessage = {
+        role: 'user',
+        parts: [{ text: userMessage }]
+      };
+      
+      const updatedHistory = [...chatHistory, newUserMessage];
+      setChatHistory(updatedHistory);
+
+      // Make API call to backend
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ history: updatedHistory }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Add AI response to chat history
+        const newModelMessage = {
+          role: 'model',
+          parts: [{ text: data.response }]
+        };
+        
+        setChatHistory([...updatedHistory, newModelMessage]);
+        return data.response;
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      throw error;
+    }
   };
 
   return (
@@ -180,6 +245,8 @@ function App() {
       <ChatInterface 
         isOpen={isChatOpen} 
         onClose={() => setIsChatOpen(false)} 
+        chatHistory={chatHistory}
+        sendMessage={sendChatMessage}
       />
     </div>
   );
