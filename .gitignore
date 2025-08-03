@@ -17,6 +17,8 @@ client/dist/
 server/dist/
 frontend/build/
 backend/dist/
+build/
+dist/
 
 # Runtime data
 pids
