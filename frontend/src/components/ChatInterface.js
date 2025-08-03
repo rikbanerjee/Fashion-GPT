@@ -7,19 +7,27 @@ const ChatInterface = ({ isOpen, onClose }) => {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const chatLogRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      if (chatLogRef.current) {
+        chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   useEffect(() => {
+    // Scroll to bottom when messages change
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (isOpen) {
+      // Lock background scrolling
+      document.body.classList.add('overflow-hidden');
+      
       // Initialize chat with welcome message
       if (messages.length === 0) {
         setMessages([
@@ -37,7 +45,15 @@ const ChatInterface = ({ isOpen, onClose }) => {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 300);
+    } else {
+      // Unlock background scrolling
+      document.body.classList.remove('overflow-hidden');
     }
+    
+    // Cleanup function to ensure body scrolling is restored
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
   }, [isOpen, messages.length]);
 
   const handleSendMessage = async () => {
@@ -270,7 +286,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={chatLogRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -338,7 +354,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
                 </motion.div>
               )}
               
-              <div ref={messagesEndRef} />
+
             </div>
 
             {/* Input Area */}
