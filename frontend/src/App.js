@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Sparkles, Palette, Zap, TrendingUp, Heart } from 'lucide-react';
+import { Sparkles, Palette, TrendingUp, Heart } from 'lucide-react';
 import ImageUpload from './components/ImageUpload';
 import ColorAnalysis from './components/ColorAnalysis';
 import LoadingSpinner from './components/LoadingSpinner';

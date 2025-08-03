@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "npm run install-all && npm run build",
   "outputDirectory": "frontend/build",
   "functions": {
     "backend/api/**/*.js": {
@@ -16,5 +16,8 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "GEMINI_API_KEY": "@gemini-api-key"
+  }
 } 
