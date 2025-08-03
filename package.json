@@ -13,6 +13,10 @@
   "keywords": ["fashion", "ai", "color-recommendation", "gemini"],
   "author": "Fashion GPT Team",
   "license": "MIT",
+  "dependencies": {
+    "multer": "^1.4.5-lts.1",
+    "@google/generative-ai": "^0.2.1"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
