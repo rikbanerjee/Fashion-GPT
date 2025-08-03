@@ -9,17 +9,14 @@
       }
     },
     {
-      "src": "backend/api/**/*.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["backend/package.json"]
-      }
+      "src": "backend/server/index.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/api/$1"
+      "dest": "/backend/server/index.js"
     },
     {
       "src": "/(.*)",
