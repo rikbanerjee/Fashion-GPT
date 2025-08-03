@@ -2,6 +2,23 @@
 
 An AI-powered fashion color recommendation system that analyzes uploaded images and provides intelligent color suggestions using Google's Gemini API.
 
+## Project Structure
+
+```
+fashion-gpt/
+├── backend/                 # Backend server and API functions
+│   ├── api/                # Vercel serverless functions
+│   ├── server/             # Express.js server
+│   └── package.json        # Backend dependencies
+├── frontend/               # React frontend application
+│   ├── src/                # React source files
+│   ├── public/             # Public assets
+│   ├── package.json        # Frontend dependencies
+│   └── tailwind.config.js  # Tailwind CSS configuration
+├── package.json            # Root package.json for scripts
+└── vercel.json            # Vercel deployment configuration
+```
+
 ## Features
 
 - **AI-Powered Analysis**: Uses Gemini Pro Vision API for intelligent color analysis
@@ -49,24 +66,21 @@ cd fashion-gpt
 ### 2. Install Dependencies
 
 ```bash
-# Install root dependencies
-npm install
-
-# Install all dependencies (frontend + backend)
+# Install all dependencies (root, backend, frontend)
 npm run install-all
 ```
 
 ### 3. Configure Environment Variables
 
-1. Copy the environment example file:
+1. Create environment file for backend:
 ```bash
-cp server/env.example server/.env
+cp backend/server/env.example backend/server/.env
 ```
 
-2. Edit `server/.env` and add your Gemini API key:
+2. Edit `backend/server/.env` and add your Gemini API key:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-PORT=5000
+PORT=5001
 ```
 
 ### 4. Get Gemini API Key
@@ -90,12 +104,12 @@ This will start:
 
 **Backend only:**
 ```bash
-npm run server
+npm run backend
 ```
 
 **Frontend only:**
 ```bash
-npm run client
+npm run frontend
 ```
 
 ## Usage
@@ -136,47 +150,43 @@ Analyzes a fashion image and returns color recommendations.
 ### GET `/api/health`
 Health check endpoint.
 
-## Project Structure
+## Deployment
 
-```
-fashion-gpt/
-├── client/                 # React frontend
-│   ├── public/            # Static files
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── App.js         # Main app component
-│   │   └── index.js       # Entry point
-│   ├── package.json
-│   └── tailwind.config.js
-├── server/                # Node.js backend
-│   ├── index.js          # Express server
-│   ├── package.json
-│   └── env.example       # Environment variables template
-├── package.json          # Root package.json
-└── README.md
-```
+### Vercel Deployment
+
+The project is configured for Vercel deployment with:
+- Frontend: React app built and served from `frontend/build`
+- Backend: Serverless functions in `backend/api`
+
+1. **Deploy to Vercel:**
+   ```bash
+   npx vercel --prod
+   ```
+
+2. **Set Environment Variables** in Vercel dashboard:
+   - `GEMINI_API_KEY`: Your Gemini API key
 
 ## Customization
 
 ### Colors
 The application avoids orange colors as per design preferences. You can modify the color palette in:
-- `client/src/components/ColorAnalysis.js` - Color mapping
-- `client/tailwind.config.js` - Tailwind color configuration
+- `frontend/src/components/ColorAnalysis.js` - Color mapping
+- `frontend/tailwind.config.js` - Tailwind color configuration
 
 ### Styling
-- Modify `client/src/index.css` for global styles
-- Update `client/tailwind.config.js` for theme customization
+- Modify `frontend/src/index.css` for global styles
+- Update `frontend/tailwind.config.js` for theme customization
 - Edit component files for specific styling changes
 
 ### AI Prompts
-Customize the AI analysis prompt in `server/index.js` to get different types of recommendations.
+Customize the AI analysis prompt in `backend/server/index.js` to get different types of recommendations.
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **"Gemini API key not configured"**
-   - Make sure you've added your API key to `server/.env`
+   - Make sure you've added your API key to `backend/server/.env`
    - Restart the server after adding the key
 
 2. **"Failed to analyze image"**
@@ -185,8 +195,8 @@ Customize the AI analysis prompt in `server/index.js` to get different types of 
    - Ensure the image file is under 10MB
 
 3. **Port conflicts**
-   - Change the PORT in `server/.env` if 5001 is in use
-   - Update the proxy in `client/package.json` if needed
+   - Change the PORT in `backend/server/.env` if 5001 is in use
+   - Update the proxy in `frontend/package.json` if needed
 
 ### Development Tips
 
@@ -215,4 +225,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using React, Node.js, and Google Gemini AI by The CustomHub LLC
+Built with ❤️ using React, Node.js, and Google Gemini AI
