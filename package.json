@@ -7,9 +7,11 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "build": "cd client && npm run build",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
-    "vercel-build": "cd client && npm run build"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "keywords": ["fashion", "ai", "color-recommendation", "gemini"],
   "author": "Fashion GPT Team",
@@ -19,6 +21,16 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "axios": "^1.6.2",
+    "react-dropzone": "^14.2.3",
+    "lucide-react": "^0.294.0",
+    "framer-motion": "^10.16.16",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
   }
 } 
