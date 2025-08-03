@@ -19,7 +19,7 @@ module.exports = function handler(req, res) {
     apiPaths: {
       health: '/api/health',
       analyzeFashion: '/api/analyze-fashion',
-      serverFile: 'backend/server/index.js',
+      serverFile: 'backend/index.js',
       apiFiles: {
         health: 'backend/api/health.js',
         analyzeFashion: 'backend/api/analyze-fashion.js'
