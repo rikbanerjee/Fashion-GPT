@@ -5,7 +5,6 @@
 @layer base {
   body {
     font-family: 'Inter', system-ui, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
   }
 }
@@ -34,11 +33,28 @@
   
   .color-chip {
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 6px;
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (min-width: 768px) {
+    .color-chip {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 } 

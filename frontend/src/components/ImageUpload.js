@@ -73,23 +73,23 @@ const ImageUpload = ({ onAnalysisStart, onAnalysisComplete, onAnalysisError }) =
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           {...getRootProps()}
-          className={`upload-area rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 ${
-            isDragActive ? 'dragover' : ''
+          className={`bg-white/60 backdrop-blur-sm border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 hover:border-indigo-400 hover:bg-white/80 ${
+            isDragActive ? 'border-indigo-500 bg-indigo-50' : ''
           }`}
         >
           <input {...getInputProps()} />
           <div className="space-y-4">
-            <div className="mx-auto w-20 h-20 bg-white/10 rounded-full flex items-center justify-center">
-              <Upload className="w-10 h-10 text-white" />
+            <div className="mx-auto w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center">
+              <Upload className="w-10 h-10 text-indigo-600" />
             </div>
             <div>
-              <h3 className="text-2xl font-semibold text-white mb-2">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">
                 {isDragActive ? 'Drop your image here' : 'Upload Fashion Image'}
               </h3>
-              <p className="text-white/80 mb-4">
+              <p className="text-gray-600 mb-4">
                 Drag and drop your image here, or click to browse
               </p>
-              <p className="text-sm text-white/60">
+              <p className="text-sm text-gray-500">
                 Supports: JPG, PNG, GIF, WebP (Max 10MB)
               </p>
             </div>
@@ -102,19 +102,19 @@ const ImageUpload = ({ onAnalysisStart, onAnalysisComplete, onAnalysisError }) =
           animate={{ opacity: 1, scale: 1 }}
           className="relative"
         >
-          <div className="glass-effect rounded-2xl p-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <Image className="w-6 h-6 text-white" />
-                <h3 className="text-xl font-semibold text-white">
-                  Selected Image
-                </h3>
-              </div>
+                              <div className="flex items-center space-x-3">
+                  <Image className="w-6 h-6 text-indigo-600" />
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    Selected Image
+                  </h3>
+                </div>
               <button
                 onClick={handleRemoveImage}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-gray-600" />
               </button>
             </div>
             
@@ -130,18 +130,18 @@ const ImageUpload = ({ onAnalysisStart, onAnalysisComplete, onAnalysisError }) =
               <div className="flex-1 text-center md:text-left">
                 <div className="space-y-3">
                   <div>
-                    <p className="text-white/80 text-sm">File Name</p>
-                    <p className="text-white font-medium">{selectedFile.name}</p>
+                    <p className="text-gray-600 text-sm">File Name</p>
+                    <p className="text-gray-800 font-medium">{selectedFile.name}</p>
                   </div>
                   <div>
-                    <p className="text-white/80 text-sm">File Size</p>
-                    <p className="text-white font-medium">
+                    <p className="text-gray-600 text-sm">File Size</p>
+                    <p className="text-gray-800 font-medium">
                       {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
                   <div>
-                    <p className="text-white/80 text-sm">File Type</p>
-                    <p className="text-white font-medium">{selectedFile.type}</p>
+                    <p className="text-gray-600 text-sm">File Type</p>
+                    <p className="text-gray-800 font-medium">{selectedFile.type}</p>
                   </div>
                 </div>
                 
