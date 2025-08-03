@@ -15,6 +15,8 @@ yarn-error.log*
 client/build/
 client/dist/
 server/dist/
+frontend/build/
+backend/dist/
 
 # Runtime data
 pids
@@ -66,7 +68,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public
 
 # Storybook build outputs
 .out
