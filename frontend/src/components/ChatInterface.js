@@ -75,7 +75,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isOpen, chatHistory, analysis]);
+  }, [isOpen, chatHistory, analysis, messages.length]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isTyping) return;
