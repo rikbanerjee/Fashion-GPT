@@ -14,31 +14,14 @@ function App() {
   const [chatHistory, setChatHistory] = useState([]);
 
   const handleAnalysisComplete = (result) => {
+    console.log('Analysis complete, result:', result);
     setAnalysis(result);
     setLoading(false);
     setError(null);
     
-    // Initialize chat history with the initial analysis
-    const initialUserMessage = {
-      role: 'user',
-      parts: [{ text: 'Analyze this image and give me fashion advice.' }]
-    };
-    
-    // Create the full analysis text from the structured response
-    const analysisData = result.analysis;
-    const initialAnalysisText = analysisData.rawResponse || 
-      `Dominant Colors: ${analysisData.dominantColors?.join(', ') || 'N/A'}
-       Complementary Colors: ${analysisData.complementaryColors?.join(', ') || 'N/A'}
-       Seasonal Recommendations: ${analysisData.seasonalRecommendations || 'N/A'}
-       Style Suggestions: ${analysisData.styleSuggestions?.join(', ') || 'N/A'}
-       Color Psychology: ${analysisData.colorPsychology || 'N/A'}`;
-    
-    const initialModelMessage = {
-      role: 'model',
-      parts: [{ text: initialAnalysisText }]
-    };
-    
-    setChatHistory([initialUserMessage, initialModelMessage]);
+    // Don't initialize chat history here - let ChatInterface handle it
+    // This allows the ChatInterface to show the opening line and suggestions properly
+    setChatHistory([]);
   };
 
   const handleAnalysisError = (errorMessage) => {

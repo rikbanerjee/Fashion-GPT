@@ -7,6 +7,8 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  
+
   const inputRef = useRef(null);
   const chatLogRef = useRef(null);
 
@@ -29,18 +31,42 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       document.body.classList.add('overflow-hidden');
       
       // Initialize chat with openingLine and suggestedReplies if analysis exists
-      if (analysis && analysis.analysis && messages.length === 0) {
-        const openingMessage = {
-          id: 1,
-          type: 'bot',
-          content: analysis.analysis.openingLine || 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
-          timestamp: new Date()
-        };
+      if (analysis && analysis.analysis) {
+        console.log('Analysis data available:', analysis.analysis);
+        console.log('Suggested replies:', analysis.analysis.suggestedReplies);
+        console.log('Opening line:', analysis.analysis.openingLine);
         
-        setMessages([openingMessage]);
-        setShowSuggestions(true);
+        if (chatHistory.length === 0) {
+          // First time opening chat - show opening message and suggestions
+          const openingMessage = {
+            id: 1,
+            type: 'bot',
+            content: analysis.analysis.openingLine || 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
+            timestamp: new Date()
+          };
+          
+          setMessages([openingMessage]);
+          setShowSuggestions(true);
+        } else {
+          // Chat history exists - show full conversation but check if we should show suggestions
+          const displayMessages = chatHistory.map((msg, index) => ({
+            id: index + 1,
+            type: msg.role === 'user' ? 'user' : 'bot',
+            content: msg.parts[0].text,
+            timestamp: new Date()
+          }));
+          setMessages(displayMessages);
+          
+          // Show suggestions if this is the first AI message (opening line) and no user has responded yet
+          const hasOpeningMessage = displayMessages.some(msg => 
+            msg.type === 'bot' && 
+            msg.content === analysis.analysis.openingLine
+          );
+          const hasUserResponse = displayMessages.some(msg => msg.type === 'user');
+          setShowSuggestions(hasOpeningMessage && !hasUserResponse);
+        }
       } else if (chatHistory.length > 0) {
-        // Convert chat history to display format
+        // No analysis but chat history exists
         const displayMessages = chatHistory.map((msg, index) => ({
           id: index + 1,
           type: msg.role === 'user' ? 'user' : 'bot',
@@ -49,8 +75,8 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
         }));
         setMessages(displayMessages);
         setShowSuggestions(false);
-      } else if (messages.length === 0) {
-        // Fallback welcome message
+      } else {
+        // No analysis and no chat history - fallback welcome message
         setMessages([
           {
             id: 1,
@@ -69,13 +95,16 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     } else {
       // Unlock background scrolling
       document.body.classList.remove('overflow-hidden');
+      // Reset state when chat closes
+      setMessages([]);
+      setShowSuggestions(true);
     }
     
     // Cleanup function to ensure body scrolling is restored
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isOpen, chatHistory, analysis, messages.length]);
+  }, [isOpen, chatHistory, analysis]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isTyping) return;
@@ -89,7 +118,10 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    setShowSuggestions(false);
+    // Only hide suggestions if this is the first user message
+    if (messages.length === 1) {
+      setShowSuggestions(false);
+    }
     setIsTyping(true);
 
     try {
@@ -130,6 +162,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     };
 
     setMessages(prev => [...prev, userMessage]);
+    // Hide suggestions after clicking one
     setShowSuggestions(false);
     setIsTyping(true);
 
@@ -210,6 +243,8 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
               </button>
             </div>
 
+
+            
             {/* Chat Messages */}
             <div ref={chatLogRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
@@ -239,13 +274,13 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
               ))}
               
               {/* Suggestion Chips */}
-              {showSuggestions && messages.length === 1 && (
+              {showSuggestions && analysis?.analysis?.suggestedReplies && analysis.analysis.suggestedReplies.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-wrap gap-2 justify-start"
                 >
-                  {(analysis?.analysis?.suggestedReplies || ['What\'s the occasion?', 'Show me shoe options', 'I don\'t like these colors']).map((suggestion, index) => (
+                  {analysis.analysis.suggestedReplies.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
