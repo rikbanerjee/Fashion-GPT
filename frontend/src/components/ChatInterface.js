@@ -7,6 +7,8 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [currentSuggestions, setCurrentSuggestions] = useState([]);
+  const [currentFollowUpQuestion, setCurrentFollowUpQuestion] = useState('');
   
 
   const inputRef = useRef(null);
@@ -47,6 +49,11 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           
           setMessages([openingMessage]);
           setShowSuggestions(true);
+          setCurrentSuggestions(analysis.analysis.suggestedReplies || []);
+          // Create initial suggestion chips
+          setTimeout(() => {
+            createSuggestionChips(analysis.analysis.suggestedReplies || []);
+          }, 100);
         } else if (chatHistory.length === 2) {
           // Chat history has been initialized with analysis but no user interaction yet
           // Show conversation but replace the first bot message with opening line
@@ -71,6 +78,11 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           
           // Show suggestions since no user has responded yet
           setShowSuggestions(true);
+          setCurrentSuggestions(analysis.analysis.suggestedReplies || []);
+          // Create initial suggestion chips
+          setTimeout(() => {
+            createSuggestionChips(analysis.analysis.suggestedReplies || []);
+          }, 100);
         } else {
           // Chat history has more than 2 messages - user has interacted
           // Show conversation but replace the first bot message with opening line
@@ -93,8 +105,8 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           });
           setMessages(displayMessages);
           
-          // Hide suggestions since user has already interacted
-          setShowSuggestions(false);
+          // Don't clear follow-up question or suggestions for ongoing conversations
+          // Let the message handlers manage these
         }
       } else if (chatHistory.length > 0) {
         // No analysis but chat history exists
@@ -129,6 +141,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       // Reset state when chat closes
       setMessages([]);
       setShowSuggestions(true);
+      setCurrentFollowUpQuestion('');
     }
     
     // Cleanup function to ensure body scrolling is restored
@@ -149,24 +162,38 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    // Only hide suggestions if this is the first user message
-    if (messages.length === 1) {
-      setShowSuggestions(false);
-    }
     setIsTyping(true);
 
     try {
       // Send message to backend
       const response = await sendMessage(inputValue.trim());
       
+      // Create bot message with only the answer
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: response,
+        content: response.answer,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botMessage]);
+      
+      // Store follow-up question and suggestions separately
+      setCurrentFollowUpQuestion(response.followUpQuestion || '');
+      
+      // Clear old suggestions but keep follow-up question
+      const container = document.getElementById('suggestion-chips-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+      
+      if (response.suggestedReplies && response.suggestedReplies.length > 0) {
+        setShowSuggestions(true);
+        setCurrentSuggestions(response.suggestedReplies);
+        createSuggestionChips(response.suggestedReplies);
+      } else {
+        setShowSuggestions(false);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       
@@ -193,22 +220,38 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     };
 
     setMessages(prev => [...prev, userMessage]);
-    // Hide suggestions after clicking one
-    setShowSuggestions(false);
     setIsTyping(true);
 
     try {
       // Send suggestion to backend
       const response = await sendMessage(suggestion);
       
+      // Create bot message with only the answer
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: response,
+        content: response.answer,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botMessage]);
+      
+      // Store follow-up question and suggestions separately
+      setCurrentFollowUpQuestion(response.followUpQuestion || '');
+      
+      // Clear old suggestions but keep follow-up question
+      const container = document.getElementById('suggestion-chips-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+      
+      if (response.suggestedReplies && response.suggestedReplies.length > 0) {
+        setShowSuggestions(true);
+        setCurrentSuggestions(response.suggestedReplies);
+        createSuggestionChips(response.suggestedReplies);
+      } else {
+        setShowSuggestions(false);
+      }
     } catch (error) {
       console.error('Failed to send suggestion:', error);
       
@@ -235,6 +278,35 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
 
   const formatTime = (timestamp) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Clear all suggestion chips from the container
+  const clearSuggestionChips = () => {
+    const container = document.getElementById('suggestion-chips-container');
+    if (container) {
+      container.innerHTML = '';
+    }
+    // Note: We don't clear the follow-up question here anymore
+    // It's handled separately in the message handlers
+  };
+
+  // Create and display new suggestion chips
+  const createSuggestionChips = (suggestions) => {
+    const container = document.getElementById('suggestion-chips-container');
+    if (!container) return;
+
+    // Clear existing content
+    container.innerHTML = '';
+
+    // Create new suggestion chips
+    suggestions.forEach((suggestion, index) => {
+      const button = document.createElement('button');
+      button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors mr-2 mb-2';
+      button.textContent = suggestion;
+      button.onclick = () => handleSuggestionClick(suggestion);
+      
+      container.appendChild(button);
+    });
   };
 
 
@@ -298,30 +370,27 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
                     }`}>
                       {formatTime(message.timestamp)}
                     </p>
-                    
-                    {/* Product Carousel for bot messages - removed since we're using real backend */}
                   </div>
                 </motion.div>
               ))}
               
-              {/* Suggestion Chips */}
-              {showSuggestions && analysis?.analysis?.suggestedReplies && analysis.analysis.suggestedReplies.length > 0 && (
+              {/* Follow-up Question */}
+              {currentFollowUpQuestion && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-wrap gap-2 justify-start"
+                  className="flex justify-start"
                 >
-                  {analysis.analysis.suggestedReplies.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+                  <div className="max-w-[80%] p-4 rounded-2xl bg-blue-50 text-gray-800 border border-blue-200">
+                    <p className="text-sm leading-relaxed font-medium">{currentFollowUpQuestion}</p>
+                  </div>
                 </motion.div>
               )}
+              
+              {/* Suggestion Chips Container */}
+              <div id="suggestion-chips-container" className="flex flex-wrap gap-2 justify-start">
+                {/* Dynamic suggestion chips will be created here */}
+              </div>
               
               {/* Typing Indicator */}
               {isTyping && (

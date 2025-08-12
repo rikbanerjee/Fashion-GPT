@@ -277,11 +277,25 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: 'Gemini API key not configured' });
     }
 
-    // Add a system prompt to inform the AI that analysis is already complete
+    // Add a system prompt to inform the AI that analysis is already complete and request structured response
     const contents = [
       {
         role: 'user',
-        parts: [{ text: 'IMPORTANT: You are a fashion stylist continuing a conversation. The initial image analysis has already been completed and is included in the chat history below. Do NOT ask for the image or outfit description again. Answer the user\'s latest query based on the analysis context provided.' }]
+        parts: [{ text: `IMPORTANT: You are a fashion stylist continuing a conversation. The initial image analysis has already been completed and is included in the chat history below. Do NOT ask for the image or outfit description again. Answer the user's latest query based on the analysis context provided.
+
+CRITICAL: You must respond with a JSON object containing exactly these three keys:
+1. "answer": A string containing your direct answer to the user's latest question
+2. "followUpQuestion": A short, engaging, open-ended question to prompt the user for the next step
+3. "suggestedReplies": An array of 3-4 contextually relevant strings that can be used as reply buttons
+
+Example response format:
+{
+  "answer": "Based on your blue and white outfit, I recommend navy and cream as complementary colors.",
+  "followUpQuestion": "What occasion are you dressing for?",
+  "suggestedReplies": ["A casual day out", "A formal event", "Show me accessories", "What about shoes?"]
+}
+
+Respond ONLY with valid JSON.` }]
       },
       ...history
     ];
@@ -342,9 +356,42 @@ app.post('/api/chat', async (req, res) => {
 
     const text = response.data.candidates[0].content.parts[0].text;
 
+    // Parse the JSON response from Gemini
+    let structuredResponse;
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonText = text;
+      if (text.includes('```json')) {
+        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+          jsonText = jsonMatch[1];
+        }
+      }
+      
+      structuredResponse = JSON.parse(jsonText);
+      
+      // Validate the required keys
+      if (!structuredResponse.answer || !structuredResponse.followUpQuestion || !structuredResponse.suggestedReplies) {
+        throw new Error('Missing required keys in response');
+      }
+      
+      console.log('Successfully parsed structured response:', structuredResponse);
+      
+    } catch (error) {
+      console.error('JSON parsing error:', error);
+      console.log('Raw text received:', text);
+      
+      // Fallback response if JSON parsing fails
+      structuredResponse = {
+        answer: text,
+        followUpQuestion: "What else can I help you with?",
+        suggestedReplies: ["Tell me more about the colors", "What occasions work best?", "Show me style suggestions", "Help me with accessories"]
+      };
+    }
+
     res.json({
       success: true,
-      response: text
+      ...structuredResponse
     });
 
   } catch (error) {

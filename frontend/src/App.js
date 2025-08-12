@@ -82,14 +82,20 @@ function App() {
       const data = await response.json();
       
       if (data.success) {
-        // Add AI response to chat history
+        // Add AI response to chat history using the answer from structured response
         const newModelMessage = {
           role: 'model',
-          parts: [{ text: data.response }]
+          parts: [{ text: data.answer }]
         };
         
         setChatHistory([...updatedHistory, newModelMessage]);
-        return data.response;
+        
+        // Return the structured response for the ChatInterface to use
+        return {
+          answer: data.answer,
+          followUpQuestion: data.followUpQuestion,
+          suggestedReplies: data.suggestedReplies
+        };
       } else {
         throw new Error(data.error || 'Failed to get response');
       }
