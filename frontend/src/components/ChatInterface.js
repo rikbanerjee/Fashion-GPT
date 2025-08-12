@@ -4,15 +4,87 @@ import { X, Send, MessageCircle } from 'lucide-react';
 
 const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) => {
   const [messages, setMessages] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [currentSuggestions, setCurrentSuggestions] = useState([]);
   const [currentFollowUpQuestion, setCurrentFollowUpQuestion] = useState('');
   
 
   const inputRef = useRef(null);
   const chatLogRef = useRef(null);
+
+  // Handle suggestion click
+  const handleSuggestionClick = async (suggestion) => {
+    const userMessage = {
+      id: Date.now(),
+      type: 'user',
+      content: suggestion,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      // Send suggestion to backend
+      const response = await sendMessage(suggestion);
+      
+      // Create bot message with only the answer
+      const botMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: response.answer,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+      
+      // Store follow-up question and suggestions separately
+      setCurrentFollowUpQuestion(response.followUpQuestion || '');
+      
+      // Clear old suggestions but keep follow-up question
+      const container = document.getElementById('suggestion-chips-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+      
+      if (response.suggestedReplies && response.suggestedReplies.length > 0) {
+        createSuggestionChips(response.suggestedReplies);
+      }
+    } catch (error) {
+      console.error('Failed to send suggestion:', error);
+      
+      // Show error message
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // Create and display new suggestion chips
+  const createSuggestionChips = React.useCallback((suggestions) => {
+    const container = document.getElementById('suggestion-chips-container');
+    if (!container) return;
+
+    // Clear existing content
+    container.innerHTML = '';
+
+    // Create new suggestion chips
+    suggestions.forEach((suggestion, index) => {
+      const button = document.createElement('button');
+      button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors mr-2 mb-2';
+      button.textContent = suggestion;
+      button.onclick = () => handleSuggestionClick(suggestion);
+      
+      container.appendChild(button);
+    });
+  }, []);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -48,8 +120,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           };
           
           setMessages([openingMessage]);
-          setShowSuggestions(true);
-          setCurrentSuggestions(analysis.analysis.suggestedReplies || []);
           // Create initial suggestion chips
           setTimeout(() => {
             createSuggestionChips(analysis.analysis.suggestedReplies || []);
@@ -76,9 +146,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           });
           setMessages(displayMessages);
           
-          // Show suggestions since no user has responded yet
-          setShowSuggestions(true);
-          setCurrentSuggestions(analysis.analysis.suggestedReplies || []);
           // Create initial suggestion chips
           setTimeout(() => {
             createSuggestionChips(analysis.analysis.suggestedReplies || []);
@@ -117,7 +184,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           timestamp: new Date()
         }));
         setMessages(displayMessages);
-        setShowSuggestions(false);
       } else {
         // No analysis and no chat history - fallback welcome message
         setMessages([
@@ -128,7 +194,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
             timestamp: new Date()
           }
         ]);
-        setShowSuggestions(true);
       }
       
       // Focus input after animation
@@ -140,7 +205,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       document.body.classList.remove('overflow-hidden');
       // Reset state when chat closes
       setMessages([]);
-      setShowSuggestions(true);
       setCurrentFollowUpQuestion('');
     }
     
@@ -148,7 +212,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isOpen, chatHistory, analysis]);
+  }, [isOpen, chatHistory, analysis, createSuggestionChips]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isTyping) return;
@@ -188,72 +252,10 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       }
       
       if (response.suggestedReplies && response.suggestedReplies.length > 0) {
-        setShowSuggestions(true);
-        setCurrentSuggestions(response.suggestedReplies);
         createSuggestionChips(response.suggestedReplies);
-      } else {
-        setShowSuggestions(false);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      
-      // Show error message
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'bot',
-        content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  const handleSuggestionClick = async (suggestion) => {
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: suggestion,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setIsTyping(true);
-
-    try {
-      // Send suggestion to backend
-      const response = await sendMessage(suggestion);
-      
-      // Create bot message with only the answer
-      const botMessage = {
-        id: Date.now() + 1,
-        type: 'bot',
-        content: response.answer,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      
-      // Store follow-up question and suggestions separately
-      setCurrentFollowUpQuestion(response.followUpQuestion || '');
-      
-      // Clear old suggestions but keep follow-up question
-      const container = document.getElementById('suggestion-chips-container');
-      if (container) {
-        container.innerHTML = '';
-      }
-      
-      if (response.suggestedReplies && response.suggestedReplies.length > 0) {
-        setShowSuggestions(true);
-        setCurrentSuggestions(response.suggestedReplies);
-        createSuggestionChips(response.suggestedReplies);
-      } else {
-        setShowSuggestions(false);
-      }
-    } catch (error) {
-      console.error('Failed to send suggestion:', error);
       
       // Show error message
       const errorMessage = {
@@ -278,35 +280,6 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
 
   const formatTime = (timestamp) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  // Clear all suggestion chips from the container
-  const clearSuggestionChips = () => {
-    const container = document.getElementById('suggestion-chips-container');
-    if (container) {
-      container.innerHTML = '';
-    }
-    // Note: We don't clear the follow-up question here anymore
-    // It's handled separately in the message handlers
-  };
-
-  // Create and display new suggestion chips
-  const createSuggestionChips = (suggestions) => {
-    const container = document.getElementById('suggestion-chips-container');
-    if (!container) return;
-
-    // Clear existing content
-    container.innerHTML = '';
-
-    // Create new suggestion chips
-    suggestions.forEach((suggestion, index) => {
-      const button = document.createElement('button');
-      button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors mr-2 mb-2';
-      button.textContent = suggestion;
-      button.onclick = () => handleSuggestionClick(suggestion);
-      
-      container.appendChild(button);
-    });
   };
 
 
