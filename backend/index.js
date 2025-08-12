@@ -267,7 +267,7 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
 // Conversational chat endpoint
 app.post('/api/chat', async (req, res) => {
   try {
-    const { history } = req.body;
+    const { history, initialAnalysis } = req.body;
 
     if (!history || !Array.isArray(history)) {
       return res.status(400).json({ error: 'History array is required in request body' });
@@ -277,9 +277,18 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: 'Gemini API key not configured' });
     }
 
+    // Add a system prompt to inform the AI that analysis is already complete
+    const contents = [
+      {
+        role: 'user',
+        parts: [{ text: 'IMPORTANT: You are a fashion stylist continuing a conversation. The initial image analysis has already been completed and is included in the chat history below. Do NOT ask for the image or outfit description again. Answer the user\'s latest query based on the analysis context provided.' }]
+      },
+      ...history
+    ];
+
     // Prepare the request payload for Gemini API
     const requestPayload = {
-      contents: history,
+      contents: contents,
       generationConfig: {
         temperature: 0.7,
         topK: 40,

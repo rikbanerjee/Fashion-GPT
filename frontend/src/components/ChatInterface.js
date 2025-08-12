@@ -47,23 +47,54 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
           
           setMessages([openingMessage]);
           setShowSuggestions(true);
-        } else {
-          // Chat history exists - show full conversation but check if we should show suggestions
-          const displayMessages = chatHistory.map((msg, index) => ({
-            id: index + 1,
-            type: msg.role === 'user' ? 'user' : 'bot',
-            content: msg.parts[0].text,
-            timestamp: new Date()
-          }));
+        } else if (chatHistory.length === 2) {
+          // Chat history has been initialized with analysis but no user interaction yet
+          // Show conversation but replace the first bot message with opening line
+          const displayMessages = chatHistory.map((msg, index) => {
+            // Replace the first bot message (full analysis) with the opening line for display
+            if (index === 1 && msg.role === 'model') {
+              return {
+                id: index + 1,
+                type: 'bot',
+                content: analysis.analysis.openingLine || 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
+                timestamp: new Date()
+              };
+            }
+            return {
+              id: index + 1,
+              type: msg.role === 'user' ? 'user' : 'bot',
+              content: msg.parts[0].text,
+              timestamp: new Date()
+            };
+          });
           setMessages(displayMessages);
           
-          // Show suggestions if this is the first AI message (opening line) and no user has responded yet
-          const hasOpeningMessage = displayMessages.some(msg => 
-            msg.type === 'bot' && 
-            msg.content === analysis.analysis.openingLine
-          );
-          const hasUserResponse = displayMessages.some(msg => msg.type === 'user');
-          setShowSuggestions(hasOpeningMessage && !hasUserResponse);
+          // Show suggestions since no user has responded yet
+          setShowSuggestions(true);
+        } else {
+          // Chat history has more than 2 messages - user has interacted
+          // Show conversation but replace the first bot message with opening line
+          const displayMessages = chatHistory.map((msg, index) => {
+            // Replace the first bot message (full analysis) with the opening line for display
+            if (index === 1 && msg.role === 'model') {
+              return {
+                id: index + 1,
+                type: 'bot',
+                content: analysis.analysis.openingLine || 'Great! We\'ve got your colors. Now, how can I help you refine the perfect look?',
+                timestamp: new Date()
+              };
+            }
+            return {
+              id: index + 1,
+              type: msg.role === 'user' ? 'user' : 'bot',
+              content: msg.parts[0].text,
+              timestamp: new Date()
+            };
+          });
+          setMessages(displayMessages);
+          
+          // Hide suggestions since user has already interacted
+          setShowSuggestions(false);
         }
       } else if (chatHistory.length > 0) {
         // No analysis but chat history exists

@@ -19,9 +19,27 @@ function App() {
     setLoading(false);
     setError(null);
     
-    // Don't initialize chat history here - let ChatInterface handle it
-    // This allows the ChatInterface to show the opening line and suggestions properly
-    setChatHistory([]);
+    // Initialize chat history with the full analysis for AI context
+    if (result && result.analysis) {
+      const { dominantColors, complementaryColors, seasonalRecommendations, styleSuggestions, colorPsychology } = result.analysis;
+      const fullAnalysisText = `
+        Dominant Colors: ${dominantColors?.join(', ') || 'N/A'}
+        Complementary Colors: ${complementaryColors?.join(', ') || 'N/A'}
+        Seasonal Recommendations: ${seasonalRecommendations || 'N/A'}
+        Style Suggestions: ${styleSuggestions?.join(', ') || 'N/A'}
+        Color Psychology: ${colorPsychology || 'N/A'}
+      `.trim();
+      
+      // Initialize chat history with the full analysis as the first model turn
+      const initialChatHistory = [
+        { role: 'user', parts: [{ text: 'Analyze this image and give me fashion advice.' }] },
+        { role: 'model', parts: [{ text: fullAnalysisText }] }
+      ];
+      
+      setChatHistory(initialChatHistory);
+    } else {
+      setChatHistory([]);
+    }
   };
 
   const handleAnalysisError = (errorMessage) => {
@@ -45,13 +63,16 @@ function App() {
       const updatedHistory = [...chatHistory, newUserMessage];
       setChatHistory(updatedHistory);
 
-      // Make API call to backend
+      // Make API call to backend - only send the chat history
+      // The full analysis is already included as the first model turn in the history
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ history: updatedHistory }),
+        body: JSON.stringify({ 
+          history: updatedHistory
+        }),
       });
 
       if (!response.ok) {
