@@ -11,9 +11,10 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
 
   const inputRef = useRef(null);
   const chatLogRef = useRef(null);
+  const handleSuggestionClickRef = useRef(null);
 
   // Handle suggestion click
-  const handleSuggestionClick = async (suggestion) => {
+  const handleSuggestionClick = React.useCallback(async (suggestion) => {
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -65,7 +66,10 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     } finally {
       setIsTyping(false);
     }
-  };
+  }, [sendMessage]);
+
+  // Store the function reference
+  handleSuggestionClickRef.current = handleSuggestionClick;
 
   // Create and display new suggestion chips
   const createSuggestionChips = React.useCallback((suggestions) => {
@@ -80,7 +84,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       const button = document.createElement('button');
       button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors mr-2 mb-2';
       button.textContent = suggestion;
-      button.onclick = () => handleSuggestionClick(suggestion);
+      button.onclick = () => handleSuggestionClickRef.current(suggestion);
       
       container.appendChild(button);
     });
