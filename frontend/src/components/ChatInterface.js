@@ -12,6 +12,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
   const inputRef = useRef(null);
   const chatLogRef = useRef(null);
   const handleSuggestionClickRef = useRef(null);
+  const createSuggestionChipsRef = useRef(null);
 
   // Handle suggestion click
   const handleSuggestionClick = React.useCallback(async (suggestion) => {
@@ -49,7 +50,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       }
       
       if (response.suggestedReplies && response.suggestedReplies.length > 0) {
-        createSuggestionChips(response.suggestedReplies);
+        createSuggestionChipsRef.current(response.suggestedReplies);
       }
     } catch (error) {
       console.error('Failed to send suggestion:', error);
@@ -89,6 +90,9 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       container.appendChild(button);
     });
   }, []);
+
+  // Store the function reference
+  createSuggestionChipsRef.current = createSuggestionChips;
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -256,7 +260,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
       }
       
       if (response.suggestedReplies && response.suggestedReplies.length > 0) {
-        createSuggestionChips(response.suggestedReplies);
+        createSuggestionChipsRef.current(response.suggestedReplies);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
