@@ -15,7 +15,7 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
   const createSuggestionChipsRef = useRef(null);
 
   // Handle suggestion click
-  const handleSuggestionClick = React.useCallback(async (suggestion) => {
+  const handleSuggestionClick = React.useCallback(async (suggestion, action) => {
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -27,6 +27,26 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     setIsTyping(true);
 
     try {
+      // Handle action-based suggestions
+      if (action) {
+        console.log('Executing action:', action);
+        // Here you can add specific UI actions based on the action command
+        // For example: show_formal_suggestions, focus_accessories, product_search_similar
+        switch (action) {
+          case 'show_formal_suggestions':
+            // Could trigger a specific UI state or filter
+            break;
+          case 'focus_accessories':
+            // Could highlight accessories section
+            break;
+          case 'product_search_similar':
+            // Could trigger product search
+            break;
+          default:
+            break;
+        }
+      }
+
       // Send suggestion to backend
       const response = await sendMessage(suggestion);
       
@@ -84,8 +104,15 @@ const ChatInterface = ({ isOpen, onClose, chatHistory, sendMessage, analysis }) 
     suggestions.forEach((suggestion, index) => {
       const button = document.createElement('button');
       button.className = 'px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium hover:bg-indigo-200 transition-colors mr-2 mb-2';
-      button.textContent = suggestion;
-      button.onclick = () => handleSuggestionClickRef.current(suggestion);
+      
+      // Handle both new format (object with text and action) and legacy format (string)
+      if (typeof suggestion === 'object' && suggestion.text) {
+        button.textContent = suggestion.text;
+        button.onclick = () => handleSuggestionClickRef.current(suggestion.text, suggestion.action);
+      } else {
+        button.textContent = suggestion;
+        button.onclick = () => handleSuggestionClickRef.current(suggestion);
+      }
       
       container.appendChild(button);
     });

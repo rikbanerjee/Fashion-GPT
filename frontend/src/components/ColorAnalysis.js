@@ -4,6 +4,10 @@ import { Sparkles, TrendingUp, Lightbulb } from 'lucide-react';
 import SeasonalRecommendations from './SeasonalRecommendations';
 import StyleSuggestions from './StyleSuggestions';
 import ColorPsychology from './ColorPsychology';
+import ImagePalette from './ImagePalette';
+import SuggestedPalettes from './SuggestedPalettes';
+import StyleGuide from './StyleGuide';
+import SkinToneAnalysis from './SkinToneAnalysis';
 
 const ColorAnalysis = ({ analysis }) => {
   const { analysis: colorAnalysis, originalImage } = analysis;
@@ -120,10 +124,34 @@ const ColorAnalysis = ({ analysis }) => {
 
 
 
-      {/* Analysis Results Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Complementary Colors */}
-        {colorAnalysis.complementaryColors && colorAnalysis.complementaryColors.length > 0 && (
+      {/* Enhanced Analysis Results */}
+      <div className="space-y-8">
+        {/* Skin Tone Analysis - New Personalized Component */}
+        {colorAnalysis.skinToneAnalysis && (
+          <SkinToneAnalysis skinToneAnalysis={colorAnalysis.skinToneAnalysis} />
+        )}
+
+        {/* Image Palette - New Enhanced Component */}
+        {colorAnalysis.imagePalette && colorAnalysis.imagePalette.length > 0 && (
+          <ImagePalette imagePalette={colorAnalysis.imagePalette} />
+        )}
+
+        {/* Suggested Palettes - New Enhanced Component */}
+        {colorAnalysis.suggestedPalettes && colorAnalysis.suggestedPalettes.length > 0 && (
+          <SuggestedPalettes suggestedPalettes={colorAnalysis.suggestedPalettes} />
+        )}
+
+        {/* Style Guide - New Enhanced Component */}
+        {(colorAnalysis.seasonalFit || colorAnalysis.suggestionsByOccasion) && (
+          <StyleGuide 
+            seasonalFit={colorAnalysis.seasonalFit} 
+            suggestionsByOccasion={colorAnalysis.suggestionsByOccasion} 
+          />
+        )}
+
+        {/* Legacy Components - Fallback for backward compatibility */}
+        {/* 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             {renderAnalysisSection(
               "Complementary Colors",
@@ -138,60 +166,43 @@ const ColorAnalysis = ({ analysis }) => {
               true
             )}
           </div>
-        )}
 
-        {/* Dominant Colors - Commented out for now */}
-        {/* {colorAnalysis.dominantColors && colorAnalysis.dominantColors.length > 0 && (
-          renderAnalysisSection(
-            "Dominant Colors in the Image",
-            <div>
-              <p className="mb-3 text-gray-600">
-                These are the main colors identified in your fashion piece:
-              </p>
-              {renderColorChips(colorAnalysis.dominantColors)}
-            </div>,
-            <Palette className="w-6 h-6 text-purple-300" />,
-            0.2
-          )
-        )} */}
+          {colorAnalysis.seasonalRecommendations && (
+            <div className="md:col-span-2">
+              <SeasonalRecommendations seasonalData={colorAnalysis.seasonalRecommendations} />
+            </div>
+          )}
 
-        {/* Seasonal Recommendations */}
-        {colorAnalysis.seasonalRecommendations && (
-          <div className="md:col-span-2">
-            <SeasonalRecommendations seasonalData={colorAnalysis.seasonalRecommendations} />
-          </div>
-        )}
+          {colorAnalysis.styleSuggestions && (
+            <div className="md:col-span-2">
+              <StyleSuggestions styleData={colorAnalysis.styleSuggestions} />
+            </div>
+          )}
 
-        {/* Style Suggestions */}
-        {colorAnalysis.styleSuggestions && (
-          <div className="md:col-span-2">
-            <StyleSuggestions styleData={colorAnalysis.styleSuggestions} />
-          </div>
-        )}
+          {colorAnalysis.colorPsychology && (
+            <div className="md:col-span-2">
+              <ColorPsychology psychologyData={colorAnalysis.colorPsychology} dominantColors={colorAnalysis.dominantColors} />
+            </div>
+          )}
 
-        {/* Color Psychology */}
-        {colorAnalysis.colorPsychology && (
-          <div className="md:col-span-2">
-            <ColorPsychology psychologyData={colorAnalysis.colorPsychology} dominantColors={colorAnalysis.dominantColors} />
-          </div>
-        )}
-
-        {/* Raw Response (fallback) */}
-        {colorAnalysis.rawResponse && !colorAnalysis.dominantColors && (
-          renderAnalysisSection(
-            "AI Analysis",
-            <div>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {colorAnalysis.rawResponse}
-              </p>
-            </div>,
-            <Sparkles className="w-6 h-6 text-purple-300" />,
-            0.6
-          )
-        )}
+          {colorAnalysis.rawResponse && !colorAnalysis.dominantColors && (
+            renderAnalysisSection(
+              "AI Analysis",
+              <div>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {colorAnalysis.rawResponse}
+                </p>
+              </div>,
+              <Sparkles className="w-6 h-6 text-purple-300" />,
+              0.6
+            )
+          )}
+        </div>
+        */}
       </div>
 
       {/* Tips Section */}
+      {/*
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -213,6 +224,7 @@ const ColorAnalysis = ({ analysis }) => {
             </div>
           </div>
       </motion.div>
+      */}
     </div>
   );
 };

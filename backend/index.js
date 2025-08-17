@@ -92,92 +92,105 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     const base64Image = imageBuffer.toString('base64');
     const mimeType = req.file.mimetype;
 
-    // Create the prompt for fashion analysis
+    // Create the prompt for fashion analysis with skin tone personalization
     const prompt = `
-    Analyze this fashion image and provide detailed color recommendations. Please respond with a structured JSON object that includes both detailed analysis and conversational elements.
+    Analyze this fashion image and provide personalized color recommendations. 
+
+    FIRST: Assess if skin tone analysis is possible:
+    - Is skin clearly visible in the image?
+    - Is the lighting natural and even?
+    - Can you identify undertones (warm/cool/neutral)?
+    - Are there any artificial lighting effects that might distort skin color?
+
+    IF skin tone analysis is possible:
+    - Determine skin undertone (warm/cool/neutral) and color season (spring/summer/autumn/winter)
+    - Provide personalized color recommendations based on skin tone
+    - Include seasonal adjustments for the individual
+    - Recommend colors that complement the specific skin undertone
+
+    IF skin tone analysis is NOT possible:
+    - Provide enhanced general color recommendations
+    - Focus on the clothing colors and style context
+    - Include versatile color suggestions that work for most people
+    - Explain why skin tone analysis wasn't possible
 
     Format your response as JSON with the following structure:
     {
-      "fullAnalysis": {
-        "dominantColors": [
-          {"name": "color1", "hex": "#hexcode1"},
-          {"name": "color2", "hex": "#hexcode2"}
+      "skinToneAnalysis": {
+        "detected": boolean,
+        "undertone": "warm|cool|neutral|null",
+        "season": "spring|summer|autumn|winter|null",
+        "confidence": "high|medium|low",
+        "reasoning": "explanation of why skin tone was or wasn't detected and any limitations"
+      },
+      "colorAnalysis": {
+        "imagePalette": [
+          {"name": "Color Name", "hex": "#hexcode", "role": "Base|Accent|Secondary", "item": "Specific clothing item or accessory"}
         ],
-        "complementaryColors": [
-          {"name": "color1", "hex": "#hexcode1"},
-          {"name": "color2", "hex": "#hexcode2"}
+        "suggestedPalettes": [
+          {
+            "name": "Palette Name",
+            "description": "Brief description of the palette and its effect",
+            "colors": [
+              {"name": "Color Name", "hex": "#hexcode"}
+            ]
+          }
         ],
-        "seasonalRecommendations": {
-          "spring": "Brief description for spring suitability",
-          "summer": "Brief description for summer suitability",
-          "fall": "Brief description for fall suitability", 
-          "winter": "Brief description for winter suitability",
-          "bestSeasons": ["spring", "fall"],
-          "avoidSeasons": ["summer"]
+        "colorPsychology": "Brief description of the psychological impact of the main colors"
+      },
+      "styleGuide": {
+        "seasonalFit": {
+          "bestSeasons": ["season1", "season2"],
+          "avoidSeasons": ["season1"],
+          "rationale": "Explanation of why these seasons work or don't work"
         },
-        "styleSuggestions": {
-          "formal": [
-            {"title": "Business Meeting", "description": "Professional and polished look", "icon": "briefcase"},
-            {"title": "Job Interview", "description": "Confident and trustworthy appearance", "icon": "user-check"}
-          ],
-          "businessCasual": [
-            {"title": "Office Day", "description": "Smart yet comfortable for work", "icon": "building"},
-            {"title": "Client Meeting", "description": "Approachable professional style", "icon": "handshake"}
-          ],
-          "casual": [
-            {"title": "Weekend Brunch", "description": "Relaxed and comfortable", "icon": "coffee"},
-            {"title": "Shopping Trip", "description": "Easy and practical", "icon": "shopping-bag"}
-          ],
-          "weekendNight": [
-            {"title": "Friends Night Out", "description": "Fun and social", "icon": "users"},
-            {"title": "Party", "description": "Confident and stylish", "icon": "music"}
-          ],
-          "dateNight": [
-            {"title": "Romantic Dinner", "description": "Elegant and sophisticated", "icon": "heart"},
-            {"title": "Special Occasion", "description": "Memorable and polished", "icon": "star"}
-          ]
+        "suggestionsByOccasion": {
+          "formal": "Specific styling advice for formal occasions",
+          "business": "Specific styling advice for business settings",
+          "casual": "Specific styling advice for casual settings"
         },
-        "colorPsychology": {
-          "emotionalImpact": "How these colors affect mood and emotions",
-          "socialPerception": "How others perceive you when wearing these colors",
-          "psychologicalEffects": "The psychological influence of these colors",
-          "bestContexts": ["work", "social", "personal"],
-          "colorMeanings": [
-            {"color": "navy", "meaning": "trust and professionalism"},
-            {"color": "cream", "meaning": "calmness and approachability"}
-          ]
+        "personalizedAdjustments": {
+          "bestColors": ["color1", "color2", "color3"],
+          "avoidColors": ["color1", "color2"],
+          "seasonalModifications": {
+            "spring": "Personalized spring adjustments",
+            "summer": "Personalized summer adjustments",
+            "fall": "Personalized fall adjustments",
+            "winter": "Personalized winter adjustments"
+          }
         }
       },
-      "openingLine": "A short, friendly, single-sentence string that mentions a positive highlight and asks a question. Example: 'I see that colors like dusty rose and cream would look fantastic on you! What occasion are you dressing for?'",
-      "suggestedReplies": ["A casual day out", "A formal event", "Show me products"]
+      "conversation": {
+        "openingLine": "A short, friendly, single-sentence string that mentions a positive highlight and asks a question",
+        "suggestedReplies": [
+          {"text": "Reply text", "action": "action_command"},
+          {"text": "Reply text", "action": "action_command"}
+        ]
+      }
     }
 
-    For the fullAnalysis object, include:
-    1. **dominantColors**: Array of objects with "name" (color name) and "hex" (hex color code) for main colors in the clothing
-    2. **complementaryColors**: Array of objects with "name" (color name) and "hex" (hex color code) for colors that work well together
-    3. **seasonalRecommendations**: Object with seasonal breakdown:
-       - "spring", "summer", "fall", "winter": Brief descriptions for each season
-       - "bestSeasons": Array of 1-2 seasons where these colors work best
-       - "avoidSeasons": Array of seasons to avoid (can be empty)
-    4. **styleSuggestions**: Object with categorized style recommendations:
-       - "formal": Array of formal occasion suggestions (business meetings, interviews)
-       - "businessCasual": Array of business casual suggestions (office, client meetings)
-       - "casual": Array of casual suggestions (weekend, shopping, daily activities)
-       - "weekendNight": Array of weekend night suggestions (friends, parties)
-       - "dateNight": Array of date night suggestions (romantic dinners, special occasions)
-       Each suggestion should have: "title", "description", and "icon" (use standard icon names)
-    5. **colorPsychology**: Object with psychological breakdown:
-       - "emotionalImpact": How these colors affect mood and emotions
-       - "socialPerception": How others perceive you when wearing these colors  
-       - "psychologicalEffects": The psychological influence of these colors
-       - "bestContexts": Array of contexts where these colors work best (work, social, personal)
-       - "colorMeanings": Array of objects with "color" name and "meaning" for each color
+    For the skinToneAnalysis object, include:
+    1. **detected**: Boolean indicating if skin tone analysis was possible
+    2. **undertone**: "warm", "cool", "neutral", or null if not detected
+    3. **season**: "spring", "summer", "autumn", "winter", or null if not detected
+    4. **confidence**: "high", "medium", or "low" based on image quality and skin visibility
+    5. **reasoning**: Detailed explanation of the analysis or why it wasn't possible
+
+    For the colorAnalysis object, include:
+    1. **imagePalette**: Array of objects with "name" (color name), "hex" (hex color code), "role" (Base/Accent/Secondary), and "item" (specific clothing item or accessory)
+    2. **suggestedPalettes**: Array of curated palette objects with "name", "description", and "colors" array
+    3. **colorPsychology**: Brief description of the psychological impact
+
+    For the styleGuide object, include:
+    1. **seasonalFit**: Object with "bestSeasons", "avoidSeasons" arrays, and "rationale" explanation
+    2. **suggestionsByOccasion**: Object with specific advice for "formal", "business", and "casual" occasions
+    3. **personalizedAdjustments**: Object with personalized color recommendations based on skin tone analysis
+
+    For the conversation object, include:
+    1. **openingLine**: Engaging opening that mentions specific colors and asks a relevant question
+    2. **suggestedReplies**: Array of objects with "text" and "action" keys for interactive UI commands
 
     IMPORTANT: For each color, provide both the color name and its accurate hex code. Use standard hex codes like #FF0000 for red, #0000FF for blue, etc. Be precise with the hex codes to match the actual colors in the image.
-
-    For the openingLine, make it conversational and engaging, mentioning specific colors found in the image and asking a relevant question.
-
-    For the suggestedReplies, provide 3 short, relevant options that users might want to explore next.
 
     Focus on practical, wearable color combinations and avoid orange tones as they are not preferred.
     `;
@@ -268,9 +281,57 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
       const parsedResponse = JSON.parse(jsonText);
       console.log('Successfully parsed analysis:', parsedResponse);
       
-      // Check if this is the new format with fullAnalysis object
-      if (parsedResponse.fullAnalysis && typeof parsedResponse.fullAnalysis === 'object') {
-        // New format - extract the fullAnalysis object and add conversational elements
+      // Check if this is the new enhanced format with skin tone analysis
+      if (parsedResponse.skinToneAnalysis && parsedResponse.colorAnalysis && parsedResponse.styleGuide && parsedResponse.conversation) {
+        // New enhanced format with skin tone analysis - combine all sections
+        analysis = {
+          // Skin tone analysis section
+          skinToneAnalysis: parsedResponse.skinToneAnalysis || {},
+          
+          // Color analysis section
+          imagePalette: parsedResponse.colorAnalysis.imagePalette || [],
+          suggestedPalettes: parsedResponse.colorAnalysis.suggestedPalettes || [],
+          colorPsychology: parsedResponse.colorAnalysis.colorPsychology || "",
+          
+          // Style guide section
+          seasonalFit: parsedResponse.styleGuide.seasonalFit || {},
+          suggestionsByOccasion: parsedResponse.styleGuide.suggestionsByOccasion || {},
+          personalizedAdjustments: parsedResponse.styleGuide.personalizedAdjustments || {},
+          
+          // Conversation section
+          openingLine: parsedResponse.conversation.openingLine || "Great! I've analyzed your fashion image. What would you like to know more about?",
+          suggestedReplies: parsedResponse.conversation.suggestedReplies || ["Tell me about the colors", "What occasions work best?", "Show me style suggestions"],
+          
+          // Legacy compatibility - map new structure to old for existing components
+          dominantColors: parsedResponse.colorAnalysis.imagePalette?.map(color => ({ name: color.name, hex: color.hex })) || [],
+          complementaryColors: parsedResponse.colorAnalysis.suggestedPalettes?.[0]?.colors || [],
+          seasonalRecommendations: parsedResponse.styleGuide.seasonalFit || {},
+          styleSuggestions: parsedResponse.styleGuide.suggestionsByOccasion || {}
+        };
+      } else if (parsedResponse.colorAnalysis && parsedResponse.styleGuide && parsedResponse.conversation) {
+        // Enhanced format without skin tone analysis - combine all sections
+        analysis = {
+          // Color analysis section
+          imagePalette: parsedResponse.colorAnalysis.imagePalette || [],
+          suggestedPalettes: parsedResponse.colorAnalysis.suggestedPalettes || [],
+          colorPsychology: parsedResponse.colorAnalysis.colorPsychology || "",
+          
+          // Style guide section
+          seasonalFit: parsedResponse.styleGuide.seasonalFit || {},
+          suggestionsByOccasion: parsedResponse.styleGuide.suggestionsByOccasion || {},
+          
+          // Conversation section
+          openingLine: parsedResponse.conversation.openingLine || "Great! I've analyzed your fashion image. What would you like to know more about?",
+          suggestedReplies: parsedResponse.conversation.suggestedReplies || ["Tell me about the colors", "What occasions work best?", "Show me style suggestions"],
+          
+          // Legacy compatibility - map new structure to old for existing components
+          dominantColors: parsedResponse.colorAnalysis.imagePalette?.map(color => ({ name: color.name, hex: color.hex })) || [],
+          complementaryColors: parsedResponse.colorAnalysis.suggestedPalettes?.[0]?.colors || [],
+          seasonalRecommendations: parsedResponse.styleGuide.seasonalFit || {},
+          styleSuggestions: parsedResponse.styleGuide.suggestionsByOccasion || {}
+        };
+      } else if (parsedResponse.fullAnalysis && typeof parsedResponse.fullAnalysis === 'object') {
+        // Legacy format with fullAnalysis object
         analysis = {
           ...parsedResponse.fullAnalysis,
           openingLine: parsedResponse.openingLine || "Great! I've analyzed your fashion image. What would you like to know more about?",
