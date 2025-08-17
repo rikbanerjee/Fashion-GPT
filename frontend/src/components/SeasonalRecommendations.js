@@ -58,7 +58,7 @@ const SeasonalRecommendations = ({ seasonalData }) => {
     );
   }
 
-  const { spring, summer, fall, winter, bestSeasons = [], avoidSeasons = [] } = seasonalData;
+  const { bestSeasons = [], avoidSeasons = [] } = seasonalData;
 
   return (
     <motion.div
