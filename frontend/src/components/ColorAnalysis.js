@@ -47,23 +47,34 @@ const ColorAnalysis = ({ analysis }) => {
   const renderColorChips = (colors) => {
     if (!colors || !Array.isArray(colors)) return null;
     
+    // Debug: Log the color format
+    console.log('Rendering color chips:', colors);
+    
     return (
       <div className="flex flex-wrap gap-2 md:gap-3">
-        {colors.map((color, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
-            className="flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 bg-gray-100 rounded-full border border-gray-300 hover:bg-gray-200 transition-all duration-200"
-          >
-            <div
-              className="color-chip"
-              style={{ backgroundColor: getColorHex(color) }}
-            ></div>
-            <span className="text-gray-800 font-semibold capitalize text-xs md:text-sm">{color}</span>
-          </motion.div>
-        ))}
+        {colors.map((color, index) => {
+          // Handle both new format (object with name and hex) and legacy format (string)
+          const colorName = typeof color === 'object' ? color.name : color;
+          const colorHex = typeof color === 'object' ? color.hex : getColorHex(color);
+          
+          console.log(`Color ${index}:`, { colorName, colorHex, originalColor: color });
+          
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 bg-gray-100 rounded-full border border-gray-300 hover:bg-gray-200 transition-all duration-200"
+            >
+              <div
+                className="color-chip"
+                style={{ backgroundColor: colorHex }}
+              ></div>
+              <span className="text-gray-800 font-semibold capitalize text-xs md:text-sm">{colorName}</span>
+            </motion.div>
+          );
+        })}
       </div>
     );
   };
@@ -128,10 +139,10 @@ const ColorAnalysis = ({ analysis }) => {
           )
         )}
 
-        {/* Dominant Colors */}
-        {colorAnalysis.dominantColors && colorAnalysis.dominantColors.length > 0 && (
+        {/* Dominant Colors - Commented out for now */}
+        {/* {colorAnalysis.dominantColors && colorAnalysis.dominantColors.length > 0 && (
           renderAnalysisSection(
-            "Dominant Colors",
+            "Dominant Colors in the Image",
             <div>
               <p className="mb-3 text-gray-600">
                 These are the main colors identified in your fashion piece:
@@ -141,7 +152,7 @@ const ColorAnalysis = ({ analysis }) => {
             <Palette className="w-6 h-6 text-purple-300" />,
             0.2
           )
-        )}
+        )} */}
 
         {/* Seasonal Recommendations */}
         {colorAnalysis.seasonalRecommendations && (

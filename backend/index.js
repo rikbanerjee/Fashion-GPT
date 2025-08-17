@@ -99,8 +99,14 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     Format your response as JSON with the following structure:
     {
       "fullAnalysis": {
-        "dominantColors": ["color1", "color2"],
-        "complementaryColors": ["color1", "color2"],
+        "dominantColors": [
+          {"name": "color1", "hex": "#hexcode1"},
+          {"name": "color2", "hex": "#hexcode2"}
+        ],
+        "complementaryColors": [
+          {"name": "color1", "hex": "#hexcode1"},
+          {"name": "color2", "hex": "#hexcode2"}
+        ],
         "seasonalRecommendations": "description",
         "styleSuggestions": ["suggestion1", "suggestion2"],
         "colorPsychology": "description"
@@ -110,11 +116,13 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     }
 
     For the fullAnalysis object, include:
-    1. **dominantColors**: Array of main colors in the clothing
-    2. **complementaryColors**: Array of colors that work well together
+    1. **dominantColors**: Array of objects with "name" (color name) and "hex" (hex color code) for main colors in the clothing
+    2. **complementaryColors**: Array of objects with "name" (color name) and "hex" (hex color code) for colors that work well together
     3. **seasonalRecommendations**: String describing what seasons these colors work best for
     4. **styleSuggestions**: Array of style recommendations for different occasions
     5. **colorPsychology**: String explaining what these colors convey
+
+    IMPORTANT: For each color, provide both the color name and its accurate hex code. Use standard hex codes like #FF0000 for red, #0000FF for blue, etc. Be precise with the hex codes to match the actual colors in the image.
 
     For the openingLine, make it conversational and engaging, mentioning specific colors found in the image and asking a relevant question.
 
@@ -166,11 +174,13 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
 
     // Make request to Gemini API
     console.log('Making request to Gemini API...');
-    console.log('API URL:', `${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY.substring(0, 10)}...`);
-    console.log('Request Payload Structure:', JSON.stringify({
-      contents: requestPayload.contents,
-      generationConfig: requestPayload.generationConfig
-    }, null, 2));
+    // the below console shows the API and Key
+    // console.log('API URL:', `${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY.substring(0, 10)}...`);
+    // the below console shows the request payload structure
+    // console.log('Request Payload Structure:', JSON.stringify({
+    //   contents: requestPayload.contents,
+    //   generationConfig: requestPayload.generationConfig
+    // }, null, 2));
     
     const response = await axios.post(
       `${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`,
