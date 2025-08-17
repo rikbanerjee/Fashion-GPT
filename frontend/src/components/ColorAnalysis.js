@@ -1,9 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, TrendingUp, Lightbulb } from 'lucide-react';
-import SeasonalRecommendations from './SeasonalRecommendations';
-import StyleSuggestions from './StyleSuggestions';
-import ColorPsychology from './ColorPsychology';
+import { Sparkles } from 'lucide-react';
 import ImagePalette from './ImagePalette';
 import SuggestedPalettes from './SuggestedPalettes';
 import StyleGuide from './StyleGuide';
@@ -12,93 +9,7 @@ import SkinToneAnalysis from './SkinToneAnalysis';
 const ColorAnalysis = ({ analysis }) => {
   const { analysis: colorAnalysis, originalImage } = analysis;
 
-  // Color mapping for visual representation
-  const colorMap = {
-    'red': '#ef4444',
-    'blue': '#3b82f6',
-    'green': '#10b981',
-    'yellow': '#f59e0b',
-    'purple': '#8b5cf6',
-    'pink': '#ec4899',
-    'black': '#111827',
-    'white': '#ffffff',
-    'gray': '#6b7280',
-    'brown': '#a16207',
-    'navy': '#1e3a8a',
-    'beige': '#f5f5dc',
-    'cream': '#fefce8',
-    'mint': '#a7f3d0',
-    'lavender': '#e9d5ff',
-    'coral': '#fb7185',
-    'teal': '#14b8a6',
-    'maroon': '#dc2626',
-    'olive': '#84cc16',
-    'gold': '#fbbf24',
-    'silver': '#cbd5e1',
-    'burgundy': '#991b1b',
-    'emerald': '#059669',
-    'sapphire': '#1d4ed8',
-    'rose': '#fda4af',
-    'indigo': '#6366f1',
-    'cyan': '#06b6d4',
-    'magenta': '#d946ef',
-    'lime': '#84cc16',
-    'orange': '#f97316', // Avoiding orange as per user preference
-  };
 
-  const getColorHex = (colorName) => {
-    const normalizedColor = colorName.toLowerCase().trim();
-    return colorMap[normalizedColor] || '#6b7280'; // Default gray if not found
-  };
-
-  const renderColorChips = (colors) => {
-    if (!colors || !Array.isArray(colors)) return null;
-    
-    return (
-      <div className="flex flex-wrap gap-2 md:gap-3">
-        {colors.map((color, index) => {
-          // Handle both new format (object with name and hex) and legacy format (string)
-          const colorName = typeof color === 'object' ? color.name : color;
-          const colorHex = typeof color === 'object' ? color.hex : getColorHex(color);
-          
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center space-x-2 md:space-x-3 px-3 md:px-4 py-2 md:py-3 bg-gray-100 rounded-full border border-gray-300 hover:bg-gray-200 transition-all duration-200"
-            >
-              <div
-                className="color-chip"
-                style={{ backgroundColor: colorHex }}
-              ></div>
-              <span className="text-gray-800 font-semibold capitalize text-xs md:text-sm">{colorName}</span>
-            </motion.div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderAnalysisSection = (title, content, icon, delay = 0, isFullWidth = false) => {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay }}
-        className={`bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm ${isFullWidth ? 'md:col-span-2' : ''}`}
-      >
-        <div className="flex items-center space-x-3 mb-4">
-          {icon}
-          <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
-        </div>
-        <div className="text-gray-700">
-          {content}
-        </div>
-      </motion.div>
-    );
-  };
 
   return (
     <div className="space-y-8">

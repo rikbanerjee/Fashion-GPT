@@ -5,7 +5,6 @@ import {
   Briefcase, 
   Building, 
   Coffee, 
-  Heart, 
   Star,
   CheckCircle,
   XCircle,
