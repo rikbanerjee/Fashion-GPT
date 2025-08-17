@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Sparkles, TrendingUp, Heart, Calendar, Lightbulb } from 'lucide-react';
+import { Sparkles, TrendingUp, Lightbulb } from 'lucide-react';
+import SeasonalRecommendations from './SeasonalRecommendations';
+import StyleSuggestions from './StyleSuggestions';
+import ColorPsychology from './ColorPsychology';
 
 const ColorAnalysis = ({ analysis }) => {
   const { analysis: colorAnalysis, originalImage } = analysis;
@@ -47,17 +50,12 @@ const ColorAnalysis = ({ analysis }) => {
   const renderColorChips = (colors) => {
     if (!colors || !Array.isArray(colors)) return null;
     
-    // Debug: Log the color format
-    console.log('Rendering color chips:', colors);
-    
     return (
       <div className="flex flex-wrap gap-2 md:gap-3">
         {colors.map((color, index) => {
           // Handle both new format (object with name and hex) and legacy format (string)
           const colorName = typeof color === 'object' ? color.name : color;
           const colorHex = typeof color === 'object' ? color.hex : getColorHex(color);
-          
-          console.log(`Color ${index}:`, { colorName, colorHex, originalColor: color });
           
           return (
             <motion.div
@@ -126,17 +124,20 @@ const ColorAnalysis = ({ analysis }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Complementary Colors */}
         {colorAnalysis.complementaryColors && colorAnalysis.complementaryColors.length > 0 && (
-          renderAnalysisSection(
-            "Complementary Colors",
-            <div>
-              <p className="mb-3 text-gray-600">
-                These colors would work beautifully with your current piece:
-              </p>
-              {renderColorChips(colorAnalysis.complementaryColors)}
-            </div>,
-            <TrendingUp className="w-6 h-6 text-blue-300" />,
-            0.1
-          )
+          <div className="md:col-span-2">
+            {renderAnalysisSection(
+              "Complementary Colors",
+              <div>
+                <p className="mb-3 text-gray-600">
+                  These colors would work beautifully with your current piece:
+                </p>
+                {renderColorChips(colorAnalysis.complementaryColors)}
+              </div>,
+              <TrendingUp className="w-6 h-6 text-blue-300" />,
+              0.1,
+              true
+            )}
+          </div>
         )}
 
         {/* Dominant Colors - Commented out for now */}
@@ -156,54 +157,23 @@ const ColorAnalysis = ({ analysis }) => {
 
         {/* Seasonal Recommendations */}
         {colorAnalysis.seasonalRecommendations && (
-          renderAnalysisSection(
-            "Seasonal Recommendations",
-            <div>
-              <div className="p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
-                <p className="text-gray-700 leading-relaxed">
-                  {colorAnalysis.seasonalRecommendations}
-                </p>
-              </div>
-            </div>,
-            <Calendar className="w-6 h-6 text-green-300" />,
-            0.3
-          )
+          <div className="md:col-span-2">
+            <SeasonalRecommendations seasonalData={colorAnalysis.seasonalRecommendations} />
+          </div>
         )}
 
         {/* Style Suggestions */}
-        {colorAnalysis.styleSuggestions && colorAnalysis.styleSuggestions.length > 0 && (
-          renderAnalysisSection(
-            "Style Suggestions",
-            <div>
-              <ul className="space-y-3">
-                {colorAnalysis.styleSuggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <span className="text-indigo-600 mt-1 text-lg">•</span>
-                    <span className="text-gray-700 leading-relaxed">{suggestion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>,
-            <Lightbulb className="w-6 h-6 text-yellow-300" />,
-            0.4,
-            true
-          )
+        {colorAnalysis.styleSuggestions && (
+          <div className="md:col-span-2">
+            <StyleSuggestions styleData={colorAnalysis.styleSuggestions} />
+          </div>
         )}
 
         {/* Color Psychology */}
         {colorAnalysis.colorPsychology && (
-          renderAnalysisSection(
-            "Color Psychology",
-            <div>
-              <div className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rounded-lg border border-pink-500/20">
-                <p className="text-gray-700 leading-relaxed">
-                  {colorAnalysis.colorPsychology}
-                </p>
-              </div>
-            </div>,
-            <Heart className="w-6 h-6 text-pink-300" />,
-            0.5
-          )
+          <div className="md:col-span-2">
+            <ColorPsychology psychologyData={colorAnalysis.colorPsychology} dominantColors={colorAnalysis.dominantColors} />
+          </div>
         )}
 
         {/* Raw Response (fallback) */}

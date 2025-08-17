@@ -22,12 +22,57 @@ function App() {
     // Initialize chat history with the full analysis for AI context
     if (result && result.analysis) {
       const { dominantColors, complementaryColors, seasonalRecommendations, styleSuggestions, colorPsychology } = result.analysis;
+      // Handle both new structured format and legacy format for styleSuggestions
+      let styleSuggestionsText = 'N/A';
+      if (styleSuggestions) {
+        if (Array.isArray(styleSuggestions)) {
+          // Legacy format - array of strings
+          styleSuggestionsText = styleSuggestions.join(', ');
+        } else if (typeof styleSuggestions === 'object') {
+          // New structured format - object with categories
+          const categories = Object.keys(styleSuggestions);
+          const allSuggestions = categories.flatMap(category => {
+            const suggestions = styleSuggestions[category];
+            return Array.isArray(suggestions) ? suggestions.map(s => s.title || s) : [];
+          });
+          styleSuggestionsText = allSuggestions.join(', ');
+        }
+      }
+
+      // Handle both new structured format and legacy format for seasonalRecommendations
+      let seasonalText = 'N/A';
+      if (seasonalRecommendations) {
+        if (typeof seasonalRecommendations === 'string') {
+          // Legacy format - string
+          seasonalText = seasonalRecommendations;
+        } else if (typeof seasonalRecommendations === 'object') {
+          // New structured format - object with seasons
+          const bestSeasons = seasonalRecommendations.bestSeasons || [];
+          seasonalText = `Best for: ${bestSeasons.join(', ')}`;
+        }
+      }
+
+      // Handle both new structured format and legacy format for colorPsychology
+      let psychologyText = 'N/A';
+      if (colorPsychology) {
+        if (typeof colorPsychology === 'string') {
+          // Legacy format - string
+          psychologyText = colorPsychology;
+        } else if (typeof colorPsychology === 'object') {
+          // New structured format - object with aspects
+          const aspects = [];
+          if (colorPsychology.emotionalImpact) aspects.push(colorPsychology.emotionalImpact);
+          if (colorPsychology.socialPerception) aspects.push(colorPsychology.socialPerception);
+          psychologyText = aspects.join('. ');
+        }
+      }
+
       const fullAnalysisText = `
         Dominant Colors: ${dominantColors?.join(', ') || 'N/A'}
         Complementary Colors: ${complementaryColors?.join(', ') || 'N/A'}
-        Seasonal Recommendations: ${seasonalRecommendations || 'N/A'}
-        Style Suggestions: ${styleSuggestions?.join(', ') || 'N/A'}
-        Color Psychology: ${colorPsychology || 'N/A'}
+        Seasonal Recommendations: ${seasonalText}
+        Style Suggestions: ${styleSuggestionsText}
+        Color Psychology: ${psychologyText}
       `.trim();
       
       // Initialize chat history with the full analysis as the first model turn

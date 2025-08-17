@@ -107,9 +107,46 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
           {"name": "color1", "hex": "#hexcode1"},
           {"name": "color2", "hex": "#hexcode2"}
         ],
-        "seasonalRecommendations": "description",
-        "styleSuggestions": ["suggestion1", "suggestion2"],
-        "colorPsychology": "description"
+        "seasonalRecommendations": {
+          "spring": "Brief description for spring suitability",
+          "summer": "Brief description for summer suitability",
+          "fall": "Brief description for fall suitability", 
+          "winter": "Brief description for winter suitability",
+          "bestSeasons": ["spring", "fall"],
+          "avoidSeasons": ["summer"]
+        },
+        "styleSuggestions": {
+          "formal": [
+            {"title": "Business Meeting", "description": "Professional and polished look", "icon": "briefcase"},
+            {"title": "Job Interview", "description": "Confident and trustworthy appearance", "icon": "user-check"}
+          ],
+          "businessCasual": [
+            {"title": "Office Day", "description": "Smart yet comfortable for work", "icon": "building"},
+            {"title": "Client Meeting", "description": "Approachable professional style", "icon": "handshake"}
+          ],
+          "casual": [
+            {"title": "Weekend Brunch", "description": "Relaxed and comfortable", "icon": "coffee"},
+            {"title": "Shopping Trip", "description": "Easy and practical", "icon": "shopping-bag"}
+          ],
+          "weekendNight": [
+            {"title": "Friends Night Out", "description": "Fun and social", "icon": "users"},
+            {"title": "Party", "description": "Confident and stylish", "icon": "music"}
+          ],
+          "dateNight": [
+            {"title": "Romantic Dinner", "description": "Elegant and sophisticated", "icon": "heart"},
+            {"title": "Special Occasion", "description": "Memorable and polished", "icon": "star"}
+          ]
+        },
+        "colorPsychology": {
+          "emotionalImpact": "How these colors affect mood and emotions",
+          "socialPerception": "How others perceive you when wearing these colors",
+          "psychologicalEffects": "The psychological influence of these colors",
+          "bestContexts": ["work", "social", "personal"],
+          "colorMeanings": [
+            {"color": "navy", "meaning": "trust and professionalism"},
+            {"color": "cream", "meaning": "calmness and approachability"}
+          ]
+        }
       },
       "openingLine": "A short, friendly, single-sentence string that mentions a positive highlight and asks a question. Example: 'I see that colors like dusty rose and cream would look fantastic on you! What occasion are you dressing for?'",
       "suggestedReplies": ["A casual day out", "A formal event", "Show me products"]
@@ -118,9 +155,23 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     For the fullAnalysis object, include:
     1. **dominantColors**: Array of objects with "name" (color name) and "hex" (hex color code) for main colors in the clothing
     2. **complementaryColors**: Array of objects with "name" (color name) and "hex" (hex color code) for colors that work well together
-    3. **seasonalRecommendations**: String describing what seasons these colors work best for
-    4. **styleSuggestions**: Array of style recommendations for different occasions
-    5. **colorPsychology**: String explaining what these colors convey
+    3. **seasonalRecommendations**: Object with seasonal breakdown:
+       - "spring", "summer", "fall", "winter": Brief descriptions for each season
+       - "bestSeasons": Array of 1-2 seasons where these colors work best
+       - "avoidSeasons": Array of seasons to avoid (can be empty)
+    4. **styleSuggestions**: Object with categorized style recommendations:
+       - "formal": Array of formal occasion suggestions (business meetings, interviews)
+       - "businessCasual": Array of business casual suggestions (office, client meetings)
+       - "casual": Array of casual suggestions (weekend, shopping, daily activities)
+       - "weekendNight": Array of weekend night suggestions (friends, parties)
+       - "dateNight": Array of date night suggestions (romantic dinners, special occasions)
+       Each suggestion should have: "title", "description", and "icon" (use standard icon names)
+    5. **colorPsychology**: Object with psychological breakdown:
+       - "emotionalImpact": How these colors affect mood and emotions
+       - "socialPerception": How others perceive you when wearing these colors  
+       - "psychologicalEffects": The psychological influence of these colors
+       - "bestContexts": Array of contexts where these colors work best (work, social, personal)
+       - "colorMeanings": Array of objects with "color" name and "meaning" for each color
 
     IMPORTANT: For each color, provide both the color name and its accurate hex code. Use standard hex codes like #FF0000 for red, #0000FF for blue, etc. Be precise with the hex codes to match the actual colors in the image.
 
