@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Sparkles, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { User, Sparkles, AlertCircle, CheckCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 const SkinToneAnalysis = ({ skinToneAnalysis }) => {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
   if (!skinToneAnalysis) {
     return null;
   }
@@ -89,9 +91,6 @@ const SkinToneAnalysis = ({ skinToneAnalysis }) => {
       <div className="flex items-center space-x-3 mb-6">
         <User className="w-6 h-6 text-purple-600" />
         <h3 className="text-xl font-semibold text-gray-800">Personalized Analysis</h3>
-        <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getConfidenceColor(skinToneAnalysis.confidence)}`}>
-          {skinToneAnalysis.confidence} confidence
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -143,21 +142,45 @@ const SkinToneAnalysis = ({ skinToneAnalysis }) => {
         )}
       </div>
 
-      {/* Analysis Reasoning */}
+      {/* Analysis Details - Collapsible */}
       {skinToneAnalysis.reasoning && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200"
+          className="mt-6"
         >
-          <div className="flex items-center space-x-2 mb-2">
-            <Sparkles className="w-5 h-5 text-gray-600" />
-            <h4 className="font-semibold text-gray-800">Analysis Details</h4>
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            {skinToneAnalysis.reasoning}
-          </p>
+          <button
+            onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+            className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-5 h-5 text-gray-600" />
+              <h4 className="font-semibold text-gray-800">Analysis Details</h4>
+              <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getConfidenceColor(skinToneAnalysis.confidence)}`}>
+                {skinToneAnalysis.confidence} confidence
+              </div>
+            </div>
+            {isDetailsOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+          
+          {isDetailsOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {skinToneAnalysis.reasoning}
+              </p>
+            </motion.div>
+          )}
         </motion.div>
       )}
 

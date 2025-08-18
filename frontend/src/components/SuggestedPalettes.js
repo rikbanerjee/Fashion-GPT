@@ -56,7 +56,6 @@ const SuggestedPalettes = ({ suggestedPalettes }) => {
                   />
                   <div className="text-center">
                     <p className="text-xs font-medium text-gray-800 capitalize">{color.name}</p>
-                    <p className="text-xs text-gray-500 font-mono">{color.hex}</p>
                   </div>
                 </motion.div>
               ))}

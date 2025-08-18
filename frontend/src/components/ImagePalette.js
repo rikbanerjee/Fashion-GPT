@@ -74,7 +74,6 @@ const ImagePalette = ({ imagePalette }) => {
                   <span className="font-medium">Item:</span> {color.item}
                 </p>
               )}
-              <p className="text-xs text-gray-500 font-mono">{color.hex}</p>
             </div>
           </motion.div>
         ))}
