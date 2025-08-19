@@ -96,11 +96,17 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     const prompt = `
     Analyze this fashion image and provide personalized color recommendations. 
 
-    FIRST: Assess if skin tone analysis is possible:
+    FIRST: Assess the image for gender context and skin tone analysis:
+    - Identify if the image appears to be of a male or female person (or neutral/unclear)
     - Is skin clearly visible in the image?
     - Is the lighting natural and even?
     - Can you identify undertones (warm/cool/neutral)?
     - Are there any artificial lighting effects that might distort skin color?
+
+    IMPORTANT: Use gender-appropriate terminology:
+    - For male images: Use "accessories" instead of "jewelry", "watches" instead of "necklaces", "cufflinks" instead of "earrings"
+    - For female images: Use "jewelry", "necklaces", "earrings" as appropriate
+    - For neutral/unclear: Use "accessories" as a general term
 
     IF skin tone analysis is possible:
     - Determine skin undertone (warm/cool/neutral) and color season (spring/summer/autumn/winter)
@@ -116,6 +122,10 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
 
     Format your response as JSON with the following structure:
     {
+      "imageContext": {
+        "gender": "male|female|neutral",
+        "reasoning": "brief explanation of gender identification or why it's unclear"
+      },
       "skinToneAnalysis": {
         "detected": boolean,
         "undertone": "warm|cool|neutral|null",
@@ -125,7 +135,7 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
       },
       "colorAnalysis": {
         "imagePalette": [
-          {"name": "Color Name", "hex": "#hexcode", "role": "Base|Accent|Secondary", "item": "Specific clothing item or accessory"}
+          {"name": "Color Name", "hex": "#hexcode", "role": "Base|Accent|Secondary", "item": "Specific clothing item or accessory (use gender-appropriate terms)"}
         ],
         "suggestedPalettes": [
           {
@@ -145,9 +155,18 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
           "rationale": "Explanation of why these seasons work or don't work"
         },
         "suggestionsByOccasion": {
-          "formal": "Specific styling advice for formal occasions",
-          "business": "Specific styling advice for business settings",
-          "casual": "Specific styling advice for casual settings"
+          "formal": {
+            "text": "Specific styling advice for formal occasions (use gender-appropriate accessory terms)",
+            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+          },
+          "business": {
+            "text": "Specific styling advice for business settings (use gender-appropriate accessory terms)",
+            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+          },
+          "casual": {
+            "text": "Specific styling advice for casual settings (use gender-appropriate accessory terms)",
+            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+          }
         },
         "personalizedAdjustments": {
           "bestColors": ["color1", "color2", "color3"],
@@ -169,6 +188,10 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
       }
     }
 
+    For the imageContext object, include:
+    1. **gender**: "male", "female", or "neutral" based on the image content
+    2. **reasoning**: Brief explanation of gender identification or why it's unclear
+
     For the skinToneAnalysis object, include:
     1. **detected**: Boolean indicating if skin tone analysis was possible
     2. **undertone**: "warm", "cool", "neutral", or null if not detected
@@ -177,13 +200,19 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     5. **reasoning**: Detailed explanation of the analysis or why it wasn't possible
 
     For the colorAnalysis object, include:
-    1. **imagePalette**: Array of objects with "name" (color name), "hex" (hex color code), "role" (Base/Accent/Secondary), and "item" (specific clothing item or accessory)
+    1. **imagePalette**: Array of objects with "name" (color name), "hex" (hex color code), "role" (Base/Accent/Secondary), and "item" (specific clothing item or accessory - use gender-appropriate terms)
     2. **suggestedPalettes**: Array of curated palette objects with "name", "description", and "colors" array
     3. **colorPsychology**: Brief description of the psychological impact
 
     For the styleGuide object, include:
     1. **seasonalFit**: Object with "bestSeasons", "avoidSeasons" arrays, and "rationale" explanation
-    2. **suggestionsByOccasion**: Object with specific advice for "formal", "business", and "casual" occasions
+    2. **suggestionsByOccasion**: Object with specific advice for "formal", "business", and "casual" occasions. Each occasion should have:
+       - "text": Detailed styling advice with gender-appropriate accessory terms
+       - "visuals": Array of 3-5 relevant clothing/accessory icons that match the colors mentioned in the text. Use descriptive icon names like:
+         * Clothing: "blazer", "dress", "shirt", "pants", "skirt", "sweater", "jacket", "blouse", "trousers", "cardigan"
+         * Accessories: "watch", "necklace", "earrings", "belt", "tie", "scarf", "handbag", "shoes", "cufflinks", "bracelet"
+         * Colors: "navy", "beige", "white", "black", "gray", "brown", "silver", "gold", "burgundy", "cream"
+         * Combine color + item: "navy blazer", "beige dress", "silver watch", "gold necklace"
     3. **personalizedAdjustments**: Object with personalized color recommendations based on skin tone analysis
 
     For the conversation object, include:
@@ -285,6 +314,9 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
       if (parsedResponse.skinToneAnalysis && parsedResponse.colorAnalysis && parsedResponse.styleGuide && parsedResponse.conversation) {
         // New enhanced format with skin tone analysis - combine all sections
         analysis = {
+          // Image context section
+          imageContext: parsedResponse.imageContext || {},
+          
           // Skin tone analysis section
           skinToneAnalysis: parsedResponse.skinToneAnalysis || {},
           

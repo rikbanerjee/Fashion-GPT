@@ -5,6 +5,7 @@ import ImagePalette from './ImagePalette';
 import SuggestedPalettes from './SuggestedPalettes';
 import StyleGuide from './StyleGuide';
 import SkinToneAnalysis from './SkinToneAnalysis';
+import EnhancedStyleSuggestions from './EnhancedStyleSuggestions';
 
 const ColorAnalysis = ({ analysis }) => {
   const { analysis: colorAnalysis, originalImage } = analysis;
@@ -52,11 +53,15 @@ const ColorAnalysis = ({ analysis }) => {
           <SuggestedPalettes suggestedPalettes={colorAnalysis.suggestedPalettes} />
         )}
 
-        {/* Style Guide - New Enhanced Component */}
-        {(colorAnalysis.seasonalFit || colorAnalysis.suggestionsByOccasion) && (
+        {/* Enhanced Style Suggestions - New Component with Visual Icons */}
+        {colorAnalysis.suggestionsByOccasion && (
+          <EnhancedStyleSuggestions suggestionsByOccasion={colorAnalysis.suggestionsByOccasion} />
+        )}
+
+        {/* Style Guide - Seasonal Fit Only */}
+        {colorAnalysis.seasonalFit && (
           <StyleGuide 
             seasonalFit={colorAnalysis.seasonalFit} 
-            suggestionsByOccasion={colorAnalysis.suggestionsByOccasion} 
           />
         )}
 

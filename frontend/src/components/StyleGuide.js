@@ -2,17 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
-  Briefcase, 
-  Building, 
-  Coffee, 
-  Star,
   CheckCircle,
   XCircle,
-  Lightbulb
+  Lightbulb,
+  Briefcase,
+  Building,
+  Coffee,
+  Star
 } from 'lucide-react';
 
-const StyleGuide = ({ seasonalFit, suggestionsByOccasion }) => {
-  if (!seasonalFit && !suggestionsByOccasion) {
+const StyleGuide = ({ seasonalFit }) => {
+  if (!seasonalFit) {
     return null;
   }
 
@@ -59,15 +59,12 @@ const StyleGuide = ({ seasonalFit, suggestionsByOccasion }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Seasonal Fit Section */}
-      {seasonalFit && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-        >
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4 }}
+      className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
+    >
           <div className="flex items-center space-x-3 mb-6">
             <Calendar className="w-6 h-6 text-green-600" />
             <h3 className="text-xl font-semibold text-gray-800">Seasonal Fit</h3>
@@ -139,51 +136,7 @@ const StyleGuide = ({ seasonalFit, suggestionsByOccasion }) => {
             </motion.div>
           )}
         </motion.div>
-      )}
-
-      {/* Occasion-Based Suggestions */}
-      {suggestionsByOccasion && Object.keys(suggestionsByOccasion).length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
-        >
-          <div className="flex items-center space-x-3 mb-6">
-            <Star className="w-6 h-6 text-indigo-600" />
-            <h3 className="text-xl font-semibold text-gray-800">Styling by Occasion</h3>
-          </div>
-
-          <div className="space-y-6">
-            {Object.entries(suggestionsByOccasion).map(([occasion, suggestion], index) => {
-              const IconComponent = getOccasionIcon(occasion);
-              const colorClass = getOccasionColor(occasion);
-              
-              return (
-                <motion.div
-                  key={occasion}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  className={`p-4 rounded-lg border ${colorClass}`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className="p-2 rounded-full bg-white/50">
-                      {IconComponent && React.createElement(IconComponent, { className: "w-5 h-5" })}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold mb-2 capitalize">{occasion}</h4>
-                      <p className="text-sm leading-relaxed">{suggestion}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-};
+      );
+    };
 
 export default StyleGuide;
