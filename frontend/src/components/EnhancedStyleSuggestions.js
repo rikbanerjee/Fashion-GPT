@@ -21,6 +21,7 @@ import {
   GiTrousers,
   GiConverseShoe,
   GiLeatherBoot,
+  GiFlipFlops,
 } from 'react-icons/gi';
 
 // Bootstrap Icons (Verified)
@@ -37,6 +38,10 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
     blazer: FaUserTie,
     dress: PiDress,
     shirt: PiTShirt,
+    "t-shirt": PiTShirt, // Added t-shirt
+    "polo shirt": PiTShirt, // Added polo shirt
+    "turtleneck": PiTShirt, // Added turtleneck
+    "loafers": GiLeatherBoot, // Added loafers
     pants: GiTrousers,
     jeans: GiTrousers, // Added jeans
     skirt: GiSkirt,
@@ -45,6 +50,13 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
     blouse: PiShirtFolded,
     trousers: GiTrousers,
     cardigan: GiWool,
+    saree: PiDress, // Added saree
+    "sari": PiDress, // Added sari
+    "kurta": PiTShirt, // Added kurta
+    "leggings": GiTrousers, // Added leggings
+    sandals: GiFlipFlops, // Added sandals
+    "flip flops": GiFlipFlops, // Added flip flops
+   
     // Accessories
     watch: BsSmartwatch,
     necklace: GiPearlNecklace,
