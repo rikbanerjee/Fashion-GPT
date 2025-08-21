@@ -4,11 +4,7 @@ import {
   Calendar, 
   CheckCircle,
   XCircle,
-  Lightbulb,
-  Briefcase,
-  Building,
-  Coffee,
-  Star
+  Lightbulb
 } from 'lucide-react';
 
 const StyleGuide = ({ seasonalFit }) => {
@@ -32,31 +28,7 @@ const StyleGuide = ({ seasonalFit }) => {
     }
   };
 
-  const getOccasionIcon = (occasion) => {
-    switch (occasion?.toLowerCase()) {
-      case 'formal':
-        return Briefcase;
-      case 'business':
-        return Building;
-      case 'casual':
-        return Coffee;
-      default:
-        return Star;
-    }
-  };
 
-  const getOccasionColor = (occasion) => {
-    switch (occasion?.toLowerCase()) {
-      case 'formal':
-        return 'bg-blue-50 border-blue-200 text-blue-800';
-      case 'business':
-        return 'bg-green-50 border-green-200 text-green-800';
-      case 'casual':
-        return 'bg-orange-50 border-orange-200 text-orange-800';
-      default:
-        return 'bg-gray-50 border-gray-200 text-gray-800';
-    }
-  };
 
   return (
     <motion.div

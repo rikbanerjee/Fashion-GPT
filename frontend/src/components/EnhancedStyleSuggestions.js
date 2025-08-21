@@ -1,43 +1,64 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Briefcase, 
-  Building, 
-  Coffee, 
-  Star,
-  Circle
-} from 'lucide-react';
+
+// Phosphor Icons (Verified)
+import { PiDress, PiTShirt, PiShirtFolded } from 'react-icons/pi';
+
+// Font Awesome & Font Awesome 6 (Verified)
+import { FaUserTie, FaGem } from 'react-icons/fa';
+
+
+// Game Icons (Verified)
+import {
+  GiSkirt,
+  GiHoodie,
+  GiWool,
+  GiPearlNecklace,
+  GiBelt,
+  GiBandana,
+  GiHighHeel,
+  GiDropEarrings,
+  GiTrousers,
+  GiConverseShoe,
+  GiLeatherBoot,
+} from 'react-icons/gi';
+
+// Bootstrap Icons (Verified)
+import { BsSmartwatch, BsHandbag } from 'react-icons/bs';
 
 const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
   if (!suggestionsByOccasion || Object.keys(suggestionsByOccasion).length === 0) {
     return null;
   }
 
-  // Icon mapping for different clothing and accessory types
+  // Conservative iconMap using only verified icons
   const iconMap = {
     // Clothing
-    blazer: Briefcase,
-    dress: Star, // Using Star icon for dress
-    shirt: Star, // Using Star icon for shirt
-    pants: Star, // Using Star icon for pants
-    skirt: Star, // Using Star icon for skirt
-    sweater: Star, // Using Star icon for sweater
-    jacket: Briefcase, // Using briefcase icon for jacket (similar to blazer)
-    blouse: Star, // Using Star icon for blouse
-    trousers: Star, // Using Star icon for trousers
-    cardigan: Star, // Using Star icon for cardigan
-    
+    blazer: FaUserTie,
+    dress: PiDress,
+    shirt: PiTShirt,
+    pants: GiTrousers,
+    jeans: GiTrousers, // Added jeans
+    skirt: GiSkirt,
+    sweater: GiHoodie,
+    jacket: FaUserTie,
+    blouse: PiShirtFolded,
+    trousers: GiTrousers,
+    cardigan: GiWool,
     // Accessories
-    watch: Circle, // Using Circle icon for watch
-    necklace: Circle, // Using Circle icon for necklace
-    belt: Star, // Using Star icon for belt
-    tie: Star, // Using Star icon for tie
-    scarf: Star, // Using Star icon for scarf
-    handbag: Briefcase, // Using Briefcase icon for handbag (similar bag accessory)
-    shoes: Circle, // Using Circle icon for shoes
-    cufflinks: Circle, // Using Circle icon for cufflinks
-    bracelet: Circle, // Using Circle icon for bracelet
-    earrings: Circle, // Using Circle icon for earrings
+    watch: BsSmartwatch,
+    necklace: GiPearlNecklace,
+    belt: GiBelt,
+    tie: FaUserTie,
+    scarf: GiBandana,
+    handbag: BsHandbag,
+    shoes: GiHighHeel,
+    sneaker: GiConverseShoe, // Added sneaker
+    "leather shoes": GiLeatherBoot, // Added for Brown Leather Shoes
+    "leather loafers": GiLeatherBoot, // Added for Brown Leather Shoes
+    cufflinks: FaGem,
+    bracelet: FaGem, // Corrected and verified
+    earrings: GiDropEarrings,
   };
 
   // Color mapping for visual representation
@@ -48,11 +69,15 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
     black: '#000000',
     gray: '#6b7280',
     darkgray: '#374151',
+    charcoal: '#36454f',
     brown: '#a16207',
     silver: '#cbd5e1',
     gold: '#fbbf24',
     burgundy: '#991b1b',
     cream: '#fefce8',
+    taupe: '#8b7355',
+    powder: '#b0e0e6',
+    rose: '#fda4af',
     blue: '#3b82f6',
     red: '#ef4444',
     green: '#10b981',
@@ -64,28 +89,50 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
     indigo: '#6366f1',
   };
 
-  const getIconComponent = (iconName) => {
-    // Extract the base item name (remove color prefix)
-    const itemName = iconName.split(' ').pop().toLowerCase();
-    return iconMap[itemName] || Star;
+  const getIconComponent = (itemName) => {
+    // Handle both new structured format and legacy string format
+    const item = typeof itemName === 'object' ? itemName.item : itemName.split(' ').pop().toLowerCase();
+    return iconMap[item] || FaUserTie; // Return FaUserTie as fallback if no icon found
   };
 
-  const getIconColor = (iconName) => {
-    // Extract color from icon name (e.g., "navy blazer" -> "navy")
-    const colorName = iconName.split(' ')[0].toLowerCase();
-    return colorMap[colorName] || '#6b7280'; // Default gray if color not found
+  const getIconColor = (itemName) => {
+    // Handle both new structured format and legacy string format
+    const color = typeof itemName === 'object' ? itemName.color : itemName.split(' ')[0].toLowerCase();
+    return colorMap[color] || '#6b7280'; // Default gray if color not found
+  };
+
+  const getContrastColor = (backgroundColor) => {
+    // For light colors, use a darker version for better visibility
+    const lightColors = ['#fefce8', '#ffffff', '#f5f5dc', '#b0e0e6', '#fda4af']; // cream, white, beige, powder, rose
+    if (lightColors.includes(backgroundColor)) {
+      // Return a darker version of the same color family
+      const colorMap = {
+        '#fefce8': '#d97706', // cream -> amber
+        '#ffffff': '#6b7280', // white -> gray
+        '#f5f5dc': '#a16207', // beige -> brown
+        '#b0e0e6': '#0891b2', // powder -> cyan
+        '#fda4af': '#be185d', // rose -> pink
+      };
+      return colorMap[backgroundColor] || '#6b7280';
+    }
+    return backgroundColor;
+  };
+
+  const getDisplayName = (itemName) => {
+    // Handle both new structured format and legacy string format
+    return typeof itemName === 'object' ? itemName.displayName : itemName;
   };
 
   const getOccasionIcon = (occasion) => {
     switch (occasion?.toLowerCase()) {
       case 'formal':
-        return Briefcase;
+        return FaUserTie; // Using a general tie icon for formality
       case 'business':
-        return Building;
+        return FaUserTie; // Using a general tie icon for business
       case 'casual':
-        return Coffee;
+        return FaUserTie; // Using a general icon for casual
       default:
-        return Star;
+        return FaUserTie; // Default to FaUserTie if occasion not found
     }
   };
 
@@ -110,7 +157,7 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
       className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-sm"
     >
       <div className="flex items-center space-x-3 mb-6">
-        <Star className="w-6 h-6 text-indigo-600" />
+        <FaUserTie className="w-6 h-6 text-indigo-600" /> {/* Using a general tie icon */}
         <h3 className="text-xl font-semibold text-gray-800">Styling by Occasion</h3>
       </div>
 
@@ -144,11 +191,16 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
               {/* Visual Icons */}
               {visuals && visuals.length > 0 && (
                 <div className="mt-4">
-                  <h5 className="text-sm font-medium text-gray-700 mb-3">Suggested Items:</h5>
+                  <h5 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                    <span className="mr-2">🎯</span>
+                    Suggested Items
+                  </h5>
                   <div className="flex flex-wrap gap-3">
                     {visuals.map((visual, visualIndex) => {
                       const VisualIcon = getIconComponent(visual);
                       const iconColor = getIconColor(visual);
+                      const contrastColor = getContrastColor(iconColor);
+                      const displayName = getDisplayName(visual);
                       
                       return (
                         <motion.div
@@ -156,20 +208,28 @@ const EnhancedStyleSuggestions = ({ suggestionsByOccasion }) => {
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.05 * visualIndex }}
-                          className="flex flex-col items-center space-y-2 p-3 bg-white/50 rounded-lg border border-gray-200"
+                          className="flex flex-col items-center space-y-2 p-3 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer group"
+                          title={`${displayName} - Click to see more details`}
                         >
                           <div
-                            className="p-3 rounded-full"
+                            className="p-3 rounded-full border-2 border-gray-100 shadow-sm group-hover:border-gray-300 transition-colors duration-200"
                             style={{ backgroundColor: iconColor + '20' }}
                           >
                             <VisualIcon 
                               className="w-6 h-6" 
-                              style={{ color: iconColor }}
+                              style={{ color: contrastColor }}
                             />
                           </div>
-                          <p className="text-xs text-gray-600 text-center capitalize">
-                            {visual.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                          </p>
+                          <div className="text-center">
+                            <p className="text-xs font-medium text-gray-700 capitalize max-w-20">
+                              {displayName}
+                            </p>
+                            <div 
+                              className="w-3 h-3 rounded-full mx-auto mt-1 border border-gray-200"
+                              style={{ backgroundColor: iconColor }}
+                              title={`Color: ${displayName.split(' ')[0]}`}
+                            />
+                          </div>
                         </motion.div>
                       );
                     })}

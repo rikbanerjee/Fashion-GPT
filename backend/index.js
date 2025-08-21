@@ -157,15 +157,48 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
         "suggestionsByOccasion": {
           "formal": {
             "text": "Specific styling advice for formal occasions (use gender-appropriate accessory terms)",
-            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+            "visuals": [
+              {
+                "item": "dress",
+                "color": "navy",
+                "displayName": "Navy Dress"
+              },
+              {
+                "item": "necklace",
+                "color": "silver",
+                "displayName": "Silver Necklace"
+              }
+            ]
           },
           "business": {
             "text": "Specific styling advice for business settings (use gender-appropriate accessory terms)",
-            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+            "visuals": [
+              {
+                "item": "blazer",
+                "color": "charcoal",
+                "displayName": "Charcoal Blazer"
+              },
+              {
+                "item": "watch",
+                "color": "silver",
+                "displayName": "Silver Watch"
+              }
+            ]
           },
           "casual": {
             "text": "Specific styling advice for casual settings (use gender-appropriate accessory terms)",
-            "visuals": ["icon1", "icon2", "icon3", "icon4", "icon5"]
+            "visuals": [
+              {
+                "item": "shirt",
+                "color": "white",
+                "displayName": "White Shirt"
+              },
+              {
+                "item": "jeans",
+                "color": "blue",
+                "displayName": "Blue Jeans"
+              }
+            ]
           }
         },
         "personalizedAdjustments": {
@@ -208,11 +241,12 @@ app.post('/api/analyze-fashion', upload.single('image'), async (req, res) => {
     1. **seasonalFit**: Object with "bestSeasons", "avoidSeasons" arrays, and "rationale" explanation
     2. **suggestionsByOccasion**: Object with specific advice for "formal", "business", and "casual" occasions. Each occasion should have:
        - "text": Detailed styling advice with gender-appropriate accessory terms
-       - "visuals": Array of 3-5 relevant clothing/accessory icons that match the colors mentioned in the text. Use descriptive icon names like:
-         * Clothing: "blazer", "dress", "shirt", "pants", "skirt", "sweater", "jacket", "blouse", "trousers", "cardigan"
-         * Accessories: "watch", "necklace", "earrings", "belt", "tie", "scarf", "handbag", "shoes", "cufflinks", "bracelet"
-         * Colors: "navy", "beige", "white", "black", "gray", "brown", "silver", "gold", "burgundy", "cream"
-         * Combine color + item: "navy blazer", "beige dress", "silver watch", "gold necklace"
+       - "visuals": Array of 3-5 objects with structured item information:
+         * "item": The clothing/accessory type (e.g., "dress", "blazer", "shirt", "pants", "skirt", "sweater", "jacket", "blouse", "trousers", "cardigan", "watch", "necklace", "earrings", "belt", "tie", "scarf", "handbag", "shoes", "cufflinks", "bracelet")
+         * "color": The specific color name (e.g., "navy", "beige", "white", "black", "gray", "charcoal", "brown", "silver", "gold", "burgundy", "cream", "taupe", "powder", "rose", "blue", "red", "green", "purple", "pink", "yellow", "orange", "teal", "indigo")
+         * "displayName": The full display name combining color and item (e.g., "Navy Dress", "Silver Watch", "Taupe Handbag")
+         
+         IMPORTANT: Use specific, accurate color names that match the colors mentioned in your text description. For example, if you mention "taupe handbag" in the text, the visual should have color: "taupe" and item: "handbag".
     3. **personalizedAdjustments**: Object with personalized color recommendations based on skin tone analysis
 
     For the conversation object, include:
